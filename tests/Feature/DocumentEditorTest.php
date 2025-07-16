@@ -14,7 +14,7 @@ beforeEach(function () {
         'document-editor.github.token' => 'test-token',
         'document-editor.github.owner' => 'test-owner',
         'document-editor.github.repository' => 'test-repo',
-        'document-editor.github.base_branch' => 'main'
+        'document-editor.github.base_branch' => 'main',
     ]);
 });
 
@@ -47,7 +47,7 @@ it('lists files with include paths filtering', function () {
 
     config(['document-editor.include_document_path' => ['app']]);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result)->toHaveKey('Docs');
@@ -84,7 +84,7 @@ it('excludes vendor and node_modules regardless of include paths', function () {
 
     config(['document-editor.include_document_path' => ['app']]);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result)->toHaveKey('Docs');
@@ -113,7 +113,7 @@ it('applies exclude paths when no include paths specified', function () {
 
     config(['document-editor.exclude_document_path' => ['temp']]);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result)->toHaveKey('Docs');
@@ -147,7 +147,7 @@ it('handles root folder inclusion with special values', function () {
 
     config(['document-editor.include_document_path' => ['/']]);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result)->toHaveKey('/');
@@ -174,7 +174,7 @@ it('filters only markdown files', function () {
         ->with(base_path('/'))
         ->andReturn(collect([$mockFile1, $mockFile2]));
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result['Docs'])->toHaveCount(1);
@@ -186,7 +186,7 @@ it('handles empty file collections', function () {
         ->with(base_path('/'))
         ->andReturn(collect([]));
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result)->toBeArray();
@@ -205,7 +205,7 @@ it('converts markdown to HTML successfully', function () {
         ->with(base_path('/test-file.md'))
         ->andReturn($markdownContent);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getMarkdownFileAndConvertItToHtml('/test-file.md');
 
     expect($result)->toContain('<h1>Test Header</h1>');
@@ -218,7 +218,7 @@ it('returns error message for non-existent file', function () {
         ->with(base_path('/non-existent.md'))
         ->andReturn(false);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getMarkdownFileAndConvertItToHtml('/non-existent.md');
 
     expect($result)->toBe('<h3>Documentation for this module is not available.</h3>');
@@ -235,7 +235,7 @@ it('handles complex markdown content', function () {
         ->with(base_path('/complex.md'))
         ->andReturn($complexMarkdown);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getMarkdownFileAndConvertItToHtml('/complex.md');
 
     expect($result)->toContain('<h1>Main Title</h1>');
@@ -256,7 +256,7 @@ it('handles markdown with tables', function () {
         ->with(base_path('/table.md'))
         ->andReturn($tableMarkdown);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getMarkdownFileAndConvertItToHtml('/table.md');
 
     expect($result)->toContain('<table>');
@@ -275,7 +275,7 @@ it('handles markdown with images', function () {
         ->with(base_path('/image.md'))
         ->andReturn($imageMarkdown);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getMarkdownFileAndConvertItToHtml('/image.md');
 
     expect($result)->toContain('<img');
@@ -291,11 +291,11 @@ it('creates pull request successfully', function () {
 
     Http::fake([
         '*' => Http::response([
-            'html_url' => 'https://github.com/test-owner/test-repo/pull/123'
-        ], 201)
+            'html_url' => 'https://github.com/test-owner/test-repo/pull/123',
+        ], 201),
     ]);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->updateDocumentationUsingGithubPullRequest(
         '/test-file.md',
         'Test Module',
@@ -311,7 +311,7 @@ it('throws exception for non-existent file in PR creation', function () {
         ->with(base_path('/non-existent.md'))
         ->andReturn(false);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
 
     expect(fn () => $service->updateDocumentationUsingGithubPullRequest(
         '/non-existent.md',
@@ -328,11 +328,11 @@ it('handles GitHub API errors during PR creation', function () {
     Http::fake([
         '*' => Http::response([
             'message' => 'Validation failed',
-            'errors' => [['message' => 'Invalid repository']]
-        ], 422)
+            'errors' => [['message' => 'Invalid repository']],
+        ], 422),
     ]);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
 
     expect(fn () => $service->updateDocumentationUsingGithubPullRequest(
         '/test-file.md',
@@ -345,20 +345,20 @@ it('handles GitHub API errors during PR creation', function () {
 it('creates GitHub pull request with all steps', function () {
     Http::fake([
         'https://api.github.com/repos/test-owner/test-repo/git/ref/heads/main' => Http::response([
-            'object' => ['sha' => 'test-sha-123']
+            'object' => ['sha' => 'test-sha-123'],
         ], 200),
         'https://api.github.com/repos/test-owner/test-repo/git/refs' => Http::response([
-            'ref' => 'refs/heads/test-branch'
+            'ref' => 'refs/heads/test-branch',
         ], 201),
         'https://api.github.com/repos/test-owner/test-repo/contents/test.md' => Http::response([
-            'sha' => 'file-sha-456'
+            'sha' => 'file-sha-456',
         ], 200),
         'https://api.github.com/repos/test-owner/test-repo/pulls' => Http::response([
-            'html_url' => 'https://github.com/test-owner/test-repo/pull/123'
-        ], 201)
+            'html_url' => 'https://github.com/test-owner/test-repo/pull/123',
+        ], 201),
     ]);
 
-    $githubService = new GithubService();
+    $githubService = new GithubService;
     $prUrl = $githubService->createPR(
         'Test PR Title',
         'test.md',
@@ -376,11 +376,11 @@ it('creates GitHub pull request with all steps', function () {
 it('handles GitHub API authentication errors', function () {
     Http::fake([
         'https://api.github.com/repos/test-owner/test-repo/git/ref/heads/main' => Http::response([
-            'message' => 'Bad credentials'
-        ], 401)
+            'message' => 'Bad credentials',
+        ], 401),
     ]);
 
-    $githubService = new GithubService();
+    $githubService = new GithubService;
 
     expect(fn () => $githubService->createPR(
         'Test PR',
@@ -393,11 +393,11 @@ it('handles GitHub API authentication errors', function () {
 it('handles GitHub rate limiting', function () {
     Http::fake([
         'https://api.github.com/repos/test-owner/test-repo/git/ref/heads/main' => Http::response([
-            'message' => 'API rate limit exceeded'
-        ], 403)
+            'message' => 'API rate limit exceeded',
+        ], 403),
     ]);
 
-    $githubService = new GithubService();
+    $githubService = new GithubService;
 
     expect(fn () => $githubService->createPR(
         'Test PR',
@@ -410,14 +410,14 @@ it('handles GitHub rate limiting', function () {
 it('handles branch creation failures', function () {
     Http::fake([
         'https://api.github.com/repos/test-owner/test-repo/git/ref/heads/main' => Http::response([
-            'object' => ['sha' => 'test-sha-123']
+            'object' => ['sha' => 'test-sha-123'],
         ], 200),
         'https://api.github.com/repos/test-owner/test-repo/git/refs' => Http::response([
-            'message' => 'Reference already exists'
-        ], 422)
+            'message' => 'Reference already exists',
+        ], 422),
     ]);
 
-    $githubService = new GithubService();
+    $githubService = new GithubService;
 
     expect(fn () => $githubService->createPR(
         'Test PR',
@@ -430,17 +430,17 @@ it('handles branch creation failures', function () {
 it('handles file content update failures', function () {
     Http::fake([
         'https://api.github.com/repos/test-owner/test-repo/git/ref/heads/main' => Http::response([
-            'object' => ['sha' => 'test-sha-123']
+            'object' => ['sha' => 'test-sha-123'],
         ], 200),
         'https://api.github.com/repos/test-owner/test-repo/git/refs' => Http::response([
-            'ref' => 'refs/heads/test-branch'
+            'ref' => 'refs/heads/test-branch',
         ], 201),
         'https://api.github.com/repos/test-owner/test-repo/contents/test.md' => Http::response([
-            'message' => 'Conflict'
-        ], 409)
+            'message' => 'Conflict',
+        ], 409),
     ]);
 
-    $githubService = new GithubService();
+    $githubService = new GithubService;
 
     expect(fn () => $githubService->createPR(
         'Test PR',
@@ -473,13 +473,13 @@ it('completes full workflow from file listing to PR creation', function () {
 
     Http::fake([
         '*' => Http::response([
-            'html_url' => 'https://github.com/test-owner/test-repo/pull/integration'
-        ], 201)
+            'html_url' => 'https://github.com/test-owner/test-repo/pull/integration',
+        ], 201),
     ]);
 
     config(['document-editor.include_document_path' => ['docs']]);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
 
     // Test file listing
     $files = $service->getFileLists();
@@ -516,7 +516,7 @@ it('handles case sensitivity in path filtering', function () {
 
     config(['document-editor.include_document_path' => ['app']]);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result)->toHaveKey('Docs');
@@ -530,7 +530,7 @@ it('handles empty and null configuration values', function () {
     config(['document-editor.include_document_path' => null]);
     config(['document-editor.exclude_document_path' => null]);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result)->toBeArray();
@@ -556,7 +556,7 @@ it('tests file extension filtering edge cases', function () {
         ->with(base_path('/'))
         ->andReturn(collect([$mockFile1, $mockFile2]));
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getFileLists();
 
     // Should only include .md files, not .MD or .markdown
@@ -575,7 +575,7 @@ it('tests folder name formatting with special characters', function () {
         ->with(base_path('/'))
         ->andReturn(collect([$mockFile]));
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result)->toHaveKey('Api Docs');
@@ -593,7 +593,7 @@ it('handles deeply nested directory structures', function () {
         ->with(base_path('/'))
         ->andReturn(collect([$mockFile]));
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result)->toHaveKey('Structure');
@@ -612,7 +612,7 @@ it('handles files with no extension gracefully', function () {
         ->with(base_path('/'))
         ->andReturn(collect([$mockFile]));
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getFileLists();
 
     // Should not include files without .md extension
@@ -638,7 +638,7 @@ it('handles multiple files in same directory with different cases', function () 
         ->with(base_path('/'))
         ->andReturn(collect([$mockFile1, $mockFile2]));
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result['Docs'])->toHaveCount(2);
@@ -654,7 +654,7 @@ it('handles empty markdown file conversion', function () {
         ->with(base_path('/empty.md'))
         ->andReturn('');
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getMarkdownFileAndConvertItToHtml('/empty.md');
 
     expect($result)->toBe('');
@@ -669,7 +669,7 @@ it('handles markdown with only whitespace', function () {
         ->with(base_path('/whitespace.md'))
         ->andReturn("   \n\t  \n   ");
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getMarkdownFileAndConvertItToHtml('/whitespace.md');
 
     expect(trim($result))->toBe('');
@@ -680,14 +680,14 @@ it('handles invalid GitHub configuration values', function () {
         'document-editor.github.token' => null,
         'document-editor.github.owner' => '',
         'document-editor.github.repository' => null,
-        'document-editor.github.base_branch' => ''
+        'document-editor.github.base_branch' => '',
     ]);
 
     File::shouldReceive('exists')
         ->with(base_path('/test.md'))
         ->andReturn(true);
 
-    $service = new DocumentService();
+    $service = new DocumentService;
 
     expect(fn () => $service->updateDocumentationUsingGithubPullRequest(
         '/test.md',
@@ -697,21 +697,21 @@ it('handles invalid GitHub configuration values', function () {
 });
 
 it('handles extremely long file names and paths', function () {
-    $longName = str_repeat('very-long-name-', 20) . '.md';
-    $longPath = 'deeply/' . str_repeat('nested/', 10) . 'path';
+    $longName = str_repeat('very-long-name-', 20).'.md';
+    $longPath = 'deeply/'.str_repeat('nested/', 10).'path';
 
     $mockFile = $this->mock('SplFileInfo');
-    $mockFile->shouldReceive('getPathname')->andReturn('/' . $longPath . '/' . $longName);
+    $mockFile->shouldReceive('getPathname')->andReturn('/'.$longPath.'/'.$longName);
     $mockFile->shouldReceive('getRelativePath')->andReturn($longPath);
     $mockFile->shouldReceive('getFilename')->andReturn($longName);
     $mockFile->shouldReceive('getFilenameWithoutExtension')->andReturn(pathinfo($longName, PATHINFO_FILENAME));
-    $mockFile->shouldReceive('getRelativePathname')->andReturn($longPath . '/' . $longName);
+    $mockFile->shouldReceive('getRelativePathname')->andReturn($longPath.'/'.$longName);
 
     File::shouldReceive('allFiles')
         ->with(base_path('/'))
         ->andReturn(collect([$mockFile]));
 
-    $service = new DocumentService();
+    $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result)->toHaveKey('Path');

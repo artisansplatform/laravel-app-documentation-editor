@@ -2,7 +2,6 @@
 
 namespace Misusonu18\DocumentEditor\Providers;
 
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -41,7 +40,7 @@ class DocumentEditorServiceProvider extends ServiceProvider
         // Only register routes if enabled in config
         if (config('document-editor.route.enabled', true)) {
             Route::group($this->routeConfiguration(), function () {
-                $this->loadRoutesFrom(__DIR__ . '/../../routes/document_editor.php');
+                $this->loadRoutesFrom(__DIR__.'/../../routes/document_editor.php');
             });
         }
     }

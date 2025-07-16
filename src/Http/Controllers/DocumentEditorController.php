@@ -8,14 +8,11 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
-use Misusonu18\DocumentEditor\DocumentEditor;
 use Misusonu18\DocumentEditor\Services\DocumentService;
 
 class DocumentEditorController extends Controller
 {
-    public function __construct(protected DocumentService $documentService)
-    {
-    }
+    public function __construct(protected DocumentService $documentService) {}
 
     public function index(Request $request): View|RedirectResponse
     {
@@ -50,7 +47,7 @@ class DocumentEditorController extends Controller
     {
         $filePath = $request->string('filePath')->value();
 
-        if (empty($filePath) || !File::exists(base_path($filePath))) {
+        if (empty($filePath) || ! File::exists(base_path($filePath))) {
             return back()->with('error', 'File not found or does not exist.');
         }
 
@@ -63,7 +60,7 @@ class DocumentEditorController extends Controller
     public function update(Request $request): array|RedirectResponse
     {
         // Check if user has edit access
-        if (!$this->haveTheEditAccess()) {
+        if (! $this->haveTheEditAccess()) {
             return back()->with('error', 'You do not have permission to edit this document.');
         }
 
@@ -79,7 +76,7 @@ class DocumentEditorController extends Controller
         $content = $request->string('content');
 
         // Check if file exists
-        if (!File::exists(base_path($filePath))) {
+        if (! File::exists(base_path($filePath))) {
             return back()->with('error', 'File not found or does not exist.');
         }
 
@@ -97,7 +94,7 @@ class DocumentEditorController extends Controller
         }
 
         // Ensure file exists
-        if (!File::exists(base_path($filePath))) {
+        if (! File::exists(base_path($filePath))) {
             return 'File does not exist';
         }
 

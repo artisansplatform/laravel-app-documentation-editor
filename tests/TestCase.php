@@ -16,9 +16,6 @@ class TestCase extends Orchestra
 
     /**
      * Parse Blade template for testing without using the built-in method
-     *
-     * @param string $string
-     * @return string
      */
     protected function parseBladeString(string $string): string
     {

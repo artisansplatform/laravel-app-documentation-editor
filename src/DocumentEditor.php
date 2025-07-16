@@ -14,11 +14,11 @@ class DocumentEditor
     public static function css()
     {
         // Load built CSS
-        $appCssPath = __DIR__ . '/../resources/dist/style.css';
+        $appCssPath = __DIR__.'/../resources/dist/style.css';
         $appCssContent = file_exists($appCssPath) ? file_get_contents($appCssPath) : '';
 
         return new HtmlString('
-            <style>' . $appCssContent . '</style>
+            <style>'.$appCssContent.'</style>
         ');
     }
 
@@ -30,11 +30,11 @@ class DocumentEditor
     public static function js()
     {
         // Load built app.js
-        $appJsPath = __DIR__ . '/../resources/dist/app.js';
+        $appJsPath = __DIR__.'/../resources/dist/app.js';
         $appJsContent = file_exists($appJsPath) ? file_get_contents($appJsPath) : '';
 
         return new HtmlString('
-            <script>' . $appJsContent . '</script>
+            <script>'.$appJsContent.'</script>
         ');
     }
 }
