@@ -1,8 +1,8 @@
 <?php
 
-namespace Mishal\DocumentEditor\Tests;
+namespace Misusonu18\DocumentEditor\Tests;
 
-use Mishal\DocumentEditor\DocumentEditorServiceProvider;
+use Misusonu18\DocumentEditor\Providers\DocumentEditorServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
@@ -14,9 +14,14 @@ class TestCase extends Orchestra
         ];
     }
 
-    protected function defineEnvironment($app): void
+    /**
+     * Parse Blade template for testing without using the built-in method
+     *
+     * @param string $string
+     * @return string
+     */
+    protected function parseBladeString(string $string): string
     {
-        $app['config']->set('document-editor.theme', 'light');
-        $app['config']->set('document-editor.height', 500);
+        return app('blade.compiler')->compileString($string);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-use Mishal\DocumentEditor\Tests\TestCase;
+use Misusonu18\DocumentEditor\Tests\TestCase;
 
 /*
 |--------------------------------------------------------------------------

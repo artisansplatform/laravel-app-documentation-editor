@@ -1,9 +1,9 @@
 <?php return array(
     'root' => array(
         'name' => 'misusonu18/document-editor',
-        'pretty_version' => '1.0.0+no-version-set',
-        'version' => '1.0.0.0',
-        'reference' => null,
+        'pretty_version' => 'dev-main',
+        'version' => 'dev-main',
+        'reference' => '021283a163f045174bcf70654c829fa6ff961772',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -439,6 +439,15 @@
             'aliases' => array(),
             'dev_requirement' => true,
         ),
+        'laravel/pint' => array(
+            'pretty_version' => 'v1.24.0',
+            'version' => '1.24.0.0',
+            'reference' => '0345f3b05f136801af8c339f9d16ef29e6b4df8a',
+            'type' => 'project',
+            'install_path' => __DIR__ . '/../laravel/pint',
+            'aliases' => array(),
+            'dev_requirement' => true,
+        ),
         'laravel/prompts' => array(
             'pretty_version' => 'v0.3.5',
             'version' => '0.3.5.0',
@@ -530,9 +539,9 @@
             'dev_requirement' => false,
         ),
         'misusonu18/document-editor' => array(
-            'pretty_version' => '1.0.0+no-version-set',
-            'version' => '1.0.0.0',
-            'reference' => null,
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '021283a163f045174bcf70654c829fa6ff961772',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
