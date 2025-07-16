@@ -1,0 +1,635 @@
+// Bootstrap
+@import "~bootstrap/scss/bootstrap";
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #cb93ff, #8ec5fc);
+    background-attachment: fixed;
+    min-height: 100%;
+    overflow-x: hidden;
+}
+
+/* Glassmorphism backdrop */
+.glass-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.25);
+    background-size: cover;
+    z-index: -1;
+    opacity: 0.5;
+}
+
+.container-fluid {
+    padding: 0;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.editor-header {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 1rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.editor-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.left-navbar {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-left: none;
+    border-top: none;
+    border-bottom: none;
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+    position: sticky;
+    top: 70px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.main-content {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    height: calc(100vh - 70px);
+    overflow-y: auto;
+}
+
+.navbar-header {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    display: none;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.accordion-item {
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+}
+
+.accordion-button {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: none;
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+    box-shadow: none;
+    transition: all 0.3s ease;
+}
+
+.accordion-button:not(.collapsed) {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.accordion-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.accordion-button:focus {
+    box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
+}
+
+.single-file-folder {
+    text-decoration: none;
+    display: block;
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border: none;
+}
+
+.single-file-folder:hover {
+    background: rgba(255, 255, 255, 0.2);
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.accordion-body {
+    padding: 0;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.file-item {
+    display: block;
+    padding: 0.75rem 2rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border-left: 3px solid transparent;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.file-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    text-decoration: none;
+    border-left-color: rgba(255, 255, 255, 0.8);
+    transform: translateX(5px);
+}
+
+.file-item.active {
+    background: rgba(255, 255, 255, 0.2);
+    border-left-color: rgba(255, 255, 255, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.folder-icon {
+    color: rgba(255, 193, 7, 0.9);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.content-wrapper {
+    padding: 2rem;
+    height: 100%;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border-radius: 1rem;
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1.5rem;
+    border-radius: 4rem 4rem 0 0;
+}
+
+.card-header h1 {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-header i {
+    color: rgba(13, 110, 253, 0.8);
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.card-body {
+    padding: 2rem;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.document-content {
+    line-height: 1.6;
+}
+
+.document-content h1,
+.document-content h2,
+.document-content h3,
+.document-content h4,
+.document-content h5,
+.document-content h6 {
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.document-content p {
+    margin-bottom: 1rem;
+}
+
+.document-content ul,
+.document-content ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.document-content code {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.document-content pre {
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.document-content pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.mobile-menu-btn {
+    display: none;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.mobile-menu-btn:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.btn-outline-primary {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.fade-in {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+/* Scrollbar styling for glass effect */
+.left-navbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.left-navbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.left-navbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.left-navbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.main-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .left-navbar {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 70px);
+        z-index: 999;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+    }
+
+    .left-navbar.show {
+        transform: translateX(0);
+    }
+
+    .mobile-menu-btn {
+        display: block;
+        position: fixed;
+        top: 85px;
+        left: 1rem;
+        z-index: 1001;
+        bottom: auto;
+    }
+
+    .navbar-header {
+        display: block;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .main-content {
+        height: calc(100vh - 70px);
+    }
+
+    .content-wrapper {
+        padding: 1rem;
+    }
+
+    .card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Animation for glass elements */
+@keyframes glassFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+}
+
+.accordion-button:hover,
+.single-file-folder:hover,
+.card:hover {
+    animation: glassFloat 2s ease-in-out infinite;
+}
+
+/* Additional glass morphism enhancements */
+.text-primary {
+    color: rgba(13, 110, 253, 0.9) !important;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.text-muted {
+    color: rgba(255, 255, 255, 0.6) !important;
+}
+
+
+/* Theme Variables */
+:root {
+    /* Light Theme */
+    --bg-primary: #f8f9fa;
+    --text-primary: #333;
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-card-bg: rgba(255, 255, 255, 0.9);
+    --glass-border: rgba(209, 213, 219, 0.5);
+    --button-primary: rgba(100, 255, 218, 0.9);
+    --button-secondary: rgba(187, 134, 252, 0.7);
+    --editor-content-bg: #ffffff;
+    --editor-text: #000000;
+    --editor-border: #e0e0e0;
+    --toolbar-bg: #f5f5f5;
+    --toolbar-border: #e0e0e0;
+    --toolbar-button: #555;
+    --diff-added-bg: rgba(46, 204, 113, 0.1);
+    --diff-added-border: #2ecc71;
+    --diff-added-text: #27ae60;
+    --diff-removed-bg: rgba(231, 76, 60, 0.1);
+    --diff-removed-border: #e74c3c;
+    --diff-removed-text: #c0392b;
+}
+
+.editor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.editor-header h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.editor-sections {
+    display: flex;
+    gap: 1.5rem;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    height: 80%;
+}
+
+.editor-section {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.section-title {
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.editor-content {
+    flex: 1;
+    overflow: auto;
+    min-height: 0;
+}
+
+/* Ensure Toast UI editor is visible and has height */
+#editor {
+    height: 100% !important;
+    min-height: 500px !important;
+    width: 100% !important;
+}
+
+.toastui-editor-defaultUI {
+    height: 100% !important;
+    min-height: 500px !important;
+    border: 1px solid var(--editor-border) !important;
+}
+
+.editor-footer {
+    padding: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* Toast UI Editor Integration */
+#editor .toastui-editor-defaultUI {
+    border: none;
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+/* Fix Toast UI editor visibility issues */
+.toastui-editor-defaultUI-toolbar {
+    background-color: var(--toolbar-bg) !important;
+    border-bottom: 1px solid var(--toolbar-border) !important;
+}
+
+.toastui-editor-md-container {
+    background-color: var(--editor-content-bg) !important;
+}
+
+.toastui-editor-md-code-block {
+    background-color: var(--editor-content-bg) !important;
+}
+
+.toastui-editor-contents,
+.toastui-editor-md-container .ProseMirror {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    color: var(--editor-text) !important;
+    font-size: 16px !important;
+}
+
+.toastui-editor-contents code {
+    color: #e83e8c !important;
+    background-color: rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Make sure the editor is usable */
+.toastui-editor-md-code.toastui-editor-md-code-block {
+    padding: 15px !important;
+    color: var(--editor-text) !important;
+}
+
+/* Prose styles for markdown preview */
+.prose {
+    max-width: 100%;
+    color: var(--editor-text);
+    padding: 1.5rem;
+    border-radius: 0.375rem;
+    line-height: 1.7;
+}
+
+/* Diff view styling */
+.diff-container {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    overflow-x: auto;
+    color: var(--editor-text);
+    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.diff-line {
+    white-space: pre-wrap;
+    padding: 4px 10px;
+    margin: 2px 0;
+    border-left: 4px solid transparent;
+    background-color: var(--editor-content-bg);
+    border-radius: 0 4px 4px 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    transition: all 0.2s ease;
+}
+
+.diff-line:hover {
+    filter: brightness(1.05);
+    transform: translateX(2px);
+}
+
+.diff-added {
+    background-color: var(--diff-added-bg);
+    border-color: var(--diff-added-border);
+    color: var(--diff-added-text);
+    box-shadow: inset 0 0 0 1px rgba(0, 255, 162, 0.5);
+    animation: fadeInRight 0.4s ease-out;
+    border-radius: 1.5rem;
+}
+
+.diff-removed {
+    background-color: var(--diff-removed-bg);
+    border-color: var(--diff-removed-border);
+    color: var(--diff-removed-text);
+    text-decoration: none;
+    box-shadow: inset 0 0 0 1px rgba(255, 30, 30, 0.5);
+    animation: fadeInLeft 0.4s ease-out;
+    border-radius: 1.5rem;
+}
+
+.diff-context {
+    color: var(--editor-text);
+    opacity: 0.8;
+}
+
+/* Animation keyframes */
+@keyframes fadeInRight {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeInLeft {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Responsive Layout */
+@media (max-width: 1024px) {
+    .editor-sections {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 640px) {
+    .editor-container {
+        padding: 1rem;
+    }
+
+    .editor-header h1 {
+        font-size: 1.5rem;
+    }
+}
