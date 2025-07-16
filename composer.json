@@ -1,0 +1,54 @@
+{
+  "name": "misusonu18/document-editor",
+  "description": "Inline-injected Vite-powered document editor package",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Misusonu18\\DocumentEditor\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Misusonu18\\DocumentEditor\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Misusonu18\\DocumentEditor\\Providers\\DocumentEditorServiceProvider"
+      ]
+    }
+  },
+  "require": {
+    "php": "^8.2",
+    "illuminate/support": "^11.0",
+    "illuminate/view": "^11.0",
+    "illuminate/routing": "^11.0",
+    "illuminate/filesystem": "^11.0",
+    "illuminate/http": "^11.0"
+  },
+  "require-dev": {
+    "pestphp/pest": "^2.30",
+    "pestphp/pest-plugin-laravel": "^2.2",
+    "orchestra/testbench": "^9.0"
+  },
+  "scripts": {
+    "build": "npm run build",
+    "test": "vendor/bin/pest"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    },
+    "sort-packages": true
+  },
+  "authors": [
+    {
+      "name": "misusonu18",
+      "email": "misusonu18@gmail.com"
+    }
+  ],
+  "minimum-stability": "dev",
+  "prefer-stable": true
+}

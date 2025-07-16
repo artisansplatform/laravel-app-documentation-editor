@@ -1,0 +1,19 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "sass": "^1.89.2",
+    "terser": "^5.43.1",
+    "vite": "^6.3.5"
+  },
+  "dependencies": {
+    "@toast-ui/editor": "^3.2.2",
+    "bootstrap": "^5.3.7",
+    "bootstrap-icons": "^1.13.1",
+    "diff": "^8.0.2",
+    "sweetalert2": "^11.22.2",
+    "vite-plugin-static-copy": "^3.1.0"
+  }
+}
