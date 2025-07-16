@@ -129,7 +129,7 @@ Configure the URL parameters method:
 Then access the editor by adding the parameter to your URL:
 
 ```
-https://your-app.test/document-editor&edit-access=true
+https://your-app.test/document-editor?folderName=abc&filePath=documentation.md&edit-access=true
 ```
 
 ##### Example 2: Callback Method
