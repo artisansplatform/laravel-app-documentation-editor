@@ -8,10 +8,8 @@ class DocumentEditor
 {
     /**
      * Get CSS for the document editor
-     *
-     * @return HtmlString
      */
-    public static function css()
+    public static function css(): \Illuminate\Support\HtmlString
     {
         // Load built CSS
         $appCssPath = __DIR__.'/../resources/dist/style.css';
@@ -24,10 +22,8 @@ class DocumentEditor
 
     /**
      * Get JavaScript for the document editor
-     *
-     * @return HtmlString
      */
-    public static function js()
+    public static function js(): \Illuminate\Support\HtmlString
     {
         // Load built app.js
         $appJsPath = __DIR__.'/../resources/dist/app.js';

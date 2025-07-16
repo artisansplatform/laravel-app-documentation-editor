@@ -7,7 +7,7 @@ use Illuminate\Support\ServiceProvider;
 
 class DocumentEditorServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/document-editor.php', 'document-editor');
     }
@@ -22,7 +22,7 @@ class DocumentEditorServiceProvider extends ServiceProvider
         return ['document-editor'];
     }
 
-    public function boot()
+    public function boot(): void
     {
         // Publish config file
         $this->publishes([
@@ -39,7 +39,7 @@ class DocumentEditorServiceProvider extends ServiceProvider
     {
         // Only register routes if enabled in config
         if (config('document-editor.route.enabled', true)) {
-            Route::group($this->routeConfiguration(), function () {
+            Route::group($this->routeConfiguration(), function (): void {
                 $this->loadRoutesFrom(__DIR__.'/../../routes/document_editor.php');
             });
         }
@@ -47,10 +47,8 @@ class DocumentEditorServiceProvider extends ServiceProvider
 
     /**
      * Get route group configuration array.
-     *
-     * @return array
      */
-    protected function routeConfiguration()
+    protected function routeConfiguration(): array
     {
         return [
             'prefix' => 'document-editor',

@@ -6,10 +6,7 @@
   "autoload": {
     "psr-4": {
       "Misusonu18\\DocumentEditor\\": "src/"
-    },
-    "files": [
-      "src/helpers.php"
-    ]
+    }
   },
   "autoload-dev": {
     "psr-4": {
@@ -35,7 +32,8 @@
     "laravel/pint": "^1.24",
     "orchestra/testbench": "^9.0",
     "pestphp/pest": "^2.30",
-    "pestphp/pest-plugin-laravel": "^2.2"
+    "pestphp/pest-plugin-laravel": "^2.2",
+    "rector/rector": "^2.1"
   },
   "scripts": {
     "build": "npm run build",

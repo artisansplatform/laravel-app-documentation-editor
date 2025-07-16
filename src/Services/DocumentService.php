@@ -13,7 +13,7 @@ class DocumentService
         $includeDocumentPaths = config('document-editor.include_document_path');
 
         $files = collect(File::allFiles(base_path('/')))
-            ->reject(function ($file) use ($includeDocumentPaths) {
+            ->reject(function ($file) use ($includeDocumentPaths): bool {
                 $path = Str::lower($file->getPathname());
                 $relativePath = $file->getRelativePath();
 
@@ -45,23 +45,17 @@ class DocumentService
                 // File passed all checks, don't reject it
                 return false;
             })
-            ->filter(function ($file) {
-                return Str::endsWith($file->getFilename(), '.md');
-            });
+            ->filter(fn($file) => Str::endsWith($file->getFilename(), '.md'));
 
-        $groupedFolders = $files->groupBy(function ($file) {
-            return $this->prepareFormattedTitleForFolderName($file->getRelativePath());
-        });
+        $groupedFolders = $files->groupBy(fn($file): string => $this->prepareFormattedTitleForFolderName($file->getRelativePath()));
 
         $menus = [];
 
         foreach ($groupedFolders as $folderName => $groupedFolderFiles) {
-            $menus[$folderName] = $groupedFolderFiles->map(function ($file) {
-                return [
-                    'file_name' => $this->formattedTitleCaseFormat($file->getFilenameWithoutExtension()),
-                    'file_path' => $file->getRelativePathname(),
-                ];
-            })->toArray();
+            $menus[$folderName] = $groupedFolderFiles->map(fn($file): array => [
+                'file_name' => $this->formattedTitleCaseFormat($file->getFilenameWithoutExtension()),
+                'file_path' => $file->getRelativePathname(),
+            ])->toArray();
         }
 
         return $menus;
@@ -77,9 +71,7 @@ class DocumentService
 
         $file = File::get($filePath);
 
-        $markdownHtml = Str::markdown($file);
-
-        return $markdownHtml;
+        return Str::markdown($file);
     }
 
     public function getFile(string $filePath): string

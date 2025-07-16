@@ -16,9 +16,7 @@ class DocumentEditorController extends Controller
 
     public function index(Request $request): View|RedirectResponse
     {
-        $menuList = Cache::remember('document_editor_menu_list', 60, function () {
-            return $this->documentService->getFileLists();
-        });
+        $menuList = Cache::remember('document_editor_menu_list', 60, fn(): array => $this->documentService->getFileLists());
 
         if (config('document-editor.auth.method') === 'params' && $request->has(config('document-editor.auth.params_key')) && $request->boolean(config('document-editor.auth.params_key')) === config('document-editor.auth.params_value')) {
             return $this->edit($request);
@@ -71,7 +69,7 @@ class DocumentEditorController extends Controller
             'content' => 'required|string',
         ]);
 
-        $domainName = $request->string('folderName');
+        $stringable = $request->string('folderName');
         $filePath = $request->string('filePath');
         $content = $request->string('content');
 
@@ -82,14 +80,14 @@ class DocumentEditorController extends Controller
 
         return $this->documentService->updateDocumentationUsingGithubPullRequest(
             $filePath,
-            $domainName,
+            $stringable,
             $content
         );
     }
 
     private function getFileContent(string $filePath): string
     {
-        if (empty($filePath)) {
+        if ($filePath === '' || $filePath === '0') {
             return 'File path is required';
         }
 
