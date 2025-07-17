@@ -2,17 +2,6 @@
 
 A powerful, Vite-powered document editor package for Laravel applications that enables seamless in-app document editing with GitHub integration. Perfect for documentation sites, wikis, and content management systems.
 
-## 📋 Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [GitHub Integration](#github-integration)
-- [Contributing](#contributing)
-- [License](#license)
-
 ## 🔍 Overview
 
 Document Editor is a Laravel package that provides a modern, inline document editing experience directly within your application. It features a powerful markdown editor with WYSIWYG capabilities, GitHub integration for version control, and customizable authorization methods to control who can edit documents.
