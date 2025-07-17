@@ -1,13 +1,5 @@
 # Document Editor for Laravel
 
-<p align="center">
-  <img src="https://img.shields.io/packagist/v/misusonu18/document-editor.svg?style=flat-square" alt="Latest Version on Packagist">
-  <img src="https://img.shields.io/packagist/dt/misusonu18/document-editor.svg?style=flat-square" alt="Total Downloads">
-  <img src="https://img.shields.io/packagist/l/misusonu18/document-editor.svg?style=flat-square" alt="License">
-  <img src="https://img.shields.io/badge/php-^8.2-blue.svg?style=flat-square" alt="PHP ^8.2">
-  <img src="https://img.shields.io/badge/Laravel-^11.0-red.svg?style=flat-square" alt="Laravel ^11.0">
-</p>
-
 A powerful, Vite-powered document editor package for Laravel applications that enables seamless in-app document editing with GitHub integration. Perfect for documentation sites, wikis, and content management systems.
 
 ## 📋 Table of Contents
@@ -17,10 +9,7 @@ A powerful, Vite-powered document editor package for Laravel applications that e
 - [Requirements](#requirements)
 - [Installation](#installation)
 - [Configuration](#configuration)
-- [Usage](#usage)
 - [GitHub Integration](#github-integration)
-- [Event Handling](#event-handling)
-- [Development](#development)
 - [Contributing](#contributing)
 - [License](#license)
 
