@@ -3,7 +3,7 @@
         'name' => 'misusonu18/document-editor',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '04cda22ed77e28546ab129d08bb7103f01723b6c',
+        'reference' => 'edc6a96077f3e31a424d190fe9e65a7036b4eae7',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -541,7 +541,7 @@
         'misusonu18/document-editor' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '04cda22ed77e28546ab129d08bb7103f01723b6c',
+            'reference' => 'edc6a96077f3e31a424d190fe9e65a7036b4eae7',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

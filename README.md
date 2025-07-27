@@ -67,6 +67,8 @@ Set up GitHub integration for creating pull requests:
 ],
 ```
 
+For token creation please check the [Github Token Creation Docs](github_token_creation.md)
+
 ### Authorization
 
 Control who can edit documents:
@@ -129,7 +131,7 @@ namespace App\Services;
 
 class DocumentAuth
 {
-    public function checkPermission()
+    public static function checkPermission()
     {
         // Your Logic Goes Here.
     }
