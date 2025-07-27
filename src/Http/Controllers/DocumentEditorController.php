@@ -8,17 +8,20 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
+use Misusonu18\DocumentEditor\Enums\MethodTypes;
 use Misusonu18\DocumentEditor\Services\DocumentService;
 
 class DocumentEditorController extends Controller
 {
-    public function __construct(protected DocumentService $documentService) {}
+    public function __construct(protected DocumentService $documentService)
+    {
+    }
 
     public function index(Request $request): View|RedirectResponse
     {
-        $menuList = Cache::remember('document_editor_menu_list', 60, fn(): array => $this->documentService->getFileLists());
+        $menuList = Cache::remember('document_editor_menu_list', 60, fn (): array => $this->documentService->getFileLists());
 
-        if (config('document-editor.auth.method') === 'params' && $request->has(config('document-editor.auth.params_key')) && $request->boolean(config('document-editor.auth.params_key')) === config('document-editor.auth.params_value')) {
+        if (config('document-editor.auth.method') === MethodTypes::PARAMS->name && $request->has(config('document-editor.auth.params_key')) && $request->boolean(config('document-editor.auth.params_key')) === config('document-editor.auth.params_value')) {
             return $this->edit($request);
         }
 
@@ -105,7 +108,7 @@ class DocumentEditorController extends Controller
             return true;
         }
 
-        if (config('document-editor.auth.use_custom_callback')) {
+        if (config('document-editor.auth.method') === MethodTypes::CALLBACK->name) {
             return app()->call(config('document-editor.auth.callback'));
         }
 
