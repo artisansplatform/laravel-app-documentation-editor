@@ -52,8 +52,5 @@ return [
 
         'params_key' => env('DOCUMENT_MANAGER_AUTH_PARAMS_KEY', ''),
         'params_value' => env('DOCUMENT_MANAGER_AUTH_PARAMS_VALUE', false),
-
-        // Use custom callback for authorization logic
-        'use_custom_callback' => env('DOCUMENT_MANAGER_USE_CUSTOM_AUTH', false),
     ],
 ];

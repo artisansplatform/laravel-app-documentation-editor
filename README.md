@@ -31,7 +31,7 @@ Document Editor is a Laravel package that provides a modern, inline document edi
 composer require misusonu18/document-editor
 ```
 
-### Publish Assets and Configuration
+### Publish Configuration
 
 ```bash
 # Publish the configuration file
@@ -77,8 +77,7 @@ Control who can edit documents:
     'method' => env('DOCUMENT_MANAGER_AUTH_METHOD', 'params'), // 'callback' or 'params'
     'params_key' => env('DOCUMENT_MANAGER_AUTH_PARAMS_KEY', 'edit-by-pm'),
     'params_value' => env('DOCUMENT_MANAGER_AUTH_PARAMS_VALUE', true),
-    'use_custom_callback' => env('DOCUMENT_MANAGER_USE_CUSTOM_AUTH', false),
-    'callback' => null, // Your callback class and method
+    'callback' => [\App\Services\DocumentAuth::class, 'checkPermission'], // Your callback class and method
 ],
 ```
 
@@ -100,7 +99,6 @@ Configure the URL parameters method:
     'method' => 'params',
     'params_key' => 'edit-access',
     'params_value' => 'true',
-    'use_custom_callback' => false,
 ],
 ```
 
@@ -112,14 +110,13 @@ https://your-app.test/document-editor?folderName=abc&filePath=documentation.md&e
 
 ##### Example 2: Callback Method
 
-Configure the callback method:
+Configure the callback method, and that method should be static:
 
 ```php
 // In config/document-editor.php
 'auth' => [
     'enabled' => true,
     'method' => 'callback',
-    'use_custom_callback' => true,
     'callback' => [\App\Services\DocumentAuth::class, 'checkPermission'],
 ],
 ```
@@ -136,31 +133,6 @@ class DocumentAuth
     {
         // Your Logic Goes Here.
     }
-}
-```
-
-Alternatively, define the callback in a service provider:
-
-```php
-// In config/document-editor.php
-'auth' => [
-    'enabled' => true,
-    'method' => 'callback',
-    'use_custom_callback' => true,
-    'callback' => null,
-],
-```
-
-```php
-// In AppServiceProvider.php
-public function boot()
-{
-    config([
-        'document-editor.auth.use_custom_callback' => true,
-        'document-editor.auth.callback' => function () {
-            // Your Logic Goes Here.
-        }
-    ]);
 }
 ```
 

@@ -4,11 +4,19 @@ namespace Misusonu18\DocumentEditor\Providers;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Misusonu18\DocumentEditor\Enums\MethodTypes;
 
 class DocumentEditorServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        $allowedModes = MethodTypes::values();
+        $envMode = env('DOCUMENT_MANAGER_AUTH_METHOD', '');
+
+        if (!in_array($envMode, $allowedModes, true)) {
+            throw new \InvalidArgumentException("Invalid DOCUMENT_MANAGER_AUTH_METHOD: '$envMode'. Allowed values are: " . implode(', ', $allowedModes));
+        }
+
         $this->mergeConfigFrom(__DIR__.'/../config/document-editor.php', 'document-editor');
     }
 

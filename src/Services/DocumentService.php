@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 class DocumentService
 {
-    public function getFileLists(): array
+    public  function getFileLists(): array
     {
         $includeDocumentPaths = config('document-editor.include_document_path');
 
