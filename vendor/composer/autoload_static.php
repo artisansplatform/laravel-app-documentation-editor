@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit50442e1c9485e4eae3787e2de77900c9
+class ComposerStaticInit969a6dd1f8bf20fa9b5b4217ee0f06f1
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -145,8 +145,6 @@ class ComposerStaticInit50442e1c9485e4eae3787e2de77900c9
         array (
             'Monolog\\' => 8,
             'Mockery\\' => 8,
-            'Misusonu18\\DocumentEditor\\Tests\\' => 32,
-            'Misusonu18\\DocumentEditor\\' => 26,
         ),
         'L' => 
         array (
@@ -212,6 +210,8 @@ class ComposerStaticInit50442e1c9485e4eae3787e2de77900c9
         ),
         'A' => 
         array (
+            'Artisansplatform\\LaravelAppDocumentationEditor\\Tests\\' => 53,
+            'Artisansplatform\\LaravelAppDocumentationEditor\\' => 47,
             'App\\' => 4,
         ),
     );
@@ -468,14 +468,6 @@ class ComposerStaticInit50442e1c9485e4eae3787e2de77900c9
         array (
             0 => __DIR__ . '/..' . '/mockery/mockery/library/Mockery',
         ),
-        'Misusonu18\\DocumentEditor\\Tests\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/tests',
-        ),
-        'Misusonu18\\DocumentEditor\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/src',
-        ),
         'League\\Uri\\' => 
         array (
             0 => __DIR__ . '/..' . '/league/uri',
@@ -618,6 +610,14 @@ class ComposerStaticInit50442e1c9485e4eae3787e2de77900c9
         'Brick\\Math\\' => 
         array (
             0 => __DIR__ . '/..' . '/brick/math/src',
+        ),
+        'Artisansplatform\\LaravelAppDocumentationEditor\\Tests\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/tests',
+        ),
+        'Artisansplatform\\LaravelAppDocumentationEditor\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
         ),
         'App\\' => 
         array (
@@ -1945,9 +1945,9 @@ class ComposerStaticInit50442e1c9485e4eae3787e2de77900c9
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit50442e1c9485e4eae3787e2de77900c9::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit50442e1c9485e4eae3787e2de77900c9::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit50442e1c9485e4eae3787e2de77900c9::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit969a6dd1f8bf20fa9b5b4217ee0f06f1::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit969a6dd1f8bf20fa9b5b4217ee0f06f1::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit969a6dd1f8bf20fa9b5b4217ee0f06f1::$classMap;
 
         }, null, ClassLoader::class);
     }

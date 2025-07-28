@@ -6,15 +6,15 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Documentation Edit</title>
 
-    {{ Misusonu18\DocumentEditor\DocumentEditor::css() }}
-    {{ Misusonu18\DocumentEditor\DocumentEditor::js() }}
+    {{ Artisansplatform\LaravelAppDocumentationEditor\LaravelAppDocumentationEditor::css() }}
+    {{ Artisansplatform\LaravelAppDocumentationEditor\LaravelAppDocumentationEditor::js() }}
 </head>
 <body>
     <div class="glass-bg"></div>
     <div class="container-fluid">
         <div class="editor-header">
             <div class="d-flex align-items-center">
-                <a href="{{ route('document-editor.index') }}" class="btn btn-outline-secondary me-3">
+                <a href="{{ route('laravel-app-documentation-editor.index') }}" class="btn btn-outline-secondary me-3">
                     Back
                 </a>
 
@@ -59,12 +59,12 @@
                 content: {!! json_encode($content) !!},
                 filePath: "{{ $filePath ?? '' }}",
                 folderName: "{{ request()->string('folderName')->value() ?? '' }}",
-                indexUrl: "{{ route('document-editor.index') }}",
+                indexUrl: "{{ route('laravel-app-documentation-editor.index') }}",
             });
 
             // Set up event listeners
             document.getElementById('saveChangesButton').addEventListener('click', function() {
-                window.DocumentEditor.saveChanges(' {{ route("document-editor.update") }} ');
+                window.DocumentEditor.saveChanges(' {{ route("laravel-app-documentation-editor.update") }} ');
             });
 
             // Clean up on page unload

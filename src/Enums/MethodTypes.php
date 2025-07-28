@@ -1,6 +1,6 @@
 <?php
 
-namespace Misusonu18\DocumentEditor\Enums;
+namespace Artisansplatform\LaravelAppDocumentationEditor\Enums;
 
 enum MethodTypes
 {

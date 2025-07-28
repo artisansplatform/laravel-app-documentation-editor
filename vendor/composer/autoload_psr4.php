@@ -68,8 +68,6 @@ return array(
     'NunoMaduro\\Collision\\' => array($vendorDir . '/nunomaduro/collision/src'),
     'Monolog\\' => array($vendorDir . '/monolog/monolog/src/Monolog'),
     'Mockery\\' => array($vendorDir . '/mockery/mockery/library/Mockery'),
-    'Misusonu18\\DocumentEditor\\Tests\\' => array($baseDir . '/tests'),
-    'Misusonu18\\DocumentEditor\\' => array($baseDir . '/src'),
     'League\\Uri\\' => array($vendorDir . '/league/uri', $vendorDir . '/league/uri-interfaces'),
     'League\\MimeTypeDetection\\' => array($vendorDir . '/league/mime-type-detection/src'),
     'League\\Flysystem\\Local\\' => array($vendorDir . '/league/flysystem-local'),
@@ -105,5 +103,7 @@ return array(
     'Carbon\\Doctrine\\' => array($vendorDir . '/carbonphp/carbon-doctrine-types/src/Carbon/Doctrine'),
     'Carbon\\' => array($vendorDir . '/nesbot/carbon/src/Carbon'),
     'Brick\\Math\\' => array($vendorDir . '/brick/math/src'),
+    'Artisansplatform\\LaravelAppDocumentationEditor\\Tests\\' => array($baseDir . '/tests'),
+    'Artisansplatform\\LaravelAppDocumentationEditor\\' => array($baseDir . '/src'),
     'App\\' => array($vendorDir . '/laravel/pint/app'),
 );

@@ -28,19 +28,19 @@ Document Editor is a Laravel package that provides a modern, inline document edi
 ### Via Composer
 
 ```bash
-composer require misusonu18/document-editor
+composer require Artisansplatform/laravel-app-documentation-editor
 ```
 
 ### Publish Configuration
 
 ```bash
 # Publish the configuration file
-php artisan vendor:publish --provider="Misusonu18\DocumentEditor\Providers\DocumentEditorServiceProvider" --tag="document-editor-config"
+php artisan vendor:publish --provider="Artisansplatform\LaravelAppDocumentationEditor\Providers\LaravelAppDocumentationEditorServiceProvider" --tag="laravel-app-documentation-editor-config"
 ```
 
 ## ⚙️ Configuration
 
-After publishing the configuration file, you can customize the package settings in `config/document-editor.php`:
+After publishing the configuration file, you can customize the package settings in `config/laravel-app-documentation-editor.php`:
 
 ### Document Paths
 
@@ -59,11 +59,11 @@ Set up GitHub integration for creating pull requests:
 
 ```php
 'github' => [
-    'enabled' => env('DOCUMENT_MANAGER_GITHUB_ENABLED', false),
-    'token' => env('DOCUMENT_MANAGER_GITHUB_TOKEN'),
-    'owner' => env('DOCUMENT_MANAGER_GITHUB_OWNER'),
-    'repository' => env('DOCUMENT_MANAGER_GITHUB_REPOSITORY'),
-    'base_branch' => env('DOCUMENT_MANAGER_GITHUB_BASE_BRANCH', 'main'),
+    'enabled' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_ENABLED', false),
+    'token' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_TOKEN'),
+    'owner' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_OWNER'),
+    'repository' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_REPOSITORY'),
+    'base_branch' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_BASE_BRANCH', 'main'),
 ],
 ```
 
@@ -75,10 +75,10 @@ Control who can edit documents:
 
 ```php
 'auth' => [
-    'enabled' => env('DOCUMENT_MANAGER_AUTH_ENABLED', true),
-    'method' => env('DOCUMENT_MANAGER_AUTH_METHOD', 'params'), // 'callback' or 'params'
-    'params_key' => env('DOCUMENT_MANAGER_AUTH_PARAMS_KEY', 'edit-by-pm'),
-    'params_value' => env('DOCUMENT_MANAGER_AUTH_PARAMS_VALUE', true),
+    'enabled' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_AUTH_ENABLED', true),
+    'method' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_AUTH_METHOD', 'params'), // 'callback' or 'params'
+    'params_key' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_AUTH_PARAMS_KEY', 'edit-by-pm'),
+    'params_value' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_AUTH_PARAMS_VALUE', true),
     'callback' => [\App\Services\DocumentAuth::class, 'checkPermission'], // Your callback class and method
 ],
 ```
@@ -95,7 +95,7 @@ This package provides two authorization methods to control document editing perm
 Configure the URL parameters method:
 
 ```php
-// In config/document-editor.php
+// In config/laravel-app-documentation-editor.php
 'auth' => [
     'enabled' => true,
     'method' => 'params',
@@ -107,7 +107,7 @@ Configure the URL parameters method:
 Then access the editor by adding the parameter to your URL:
 
 ```
-https://your-app.test/document-editor?folderName=abc&filePath=documentation.md&edit-access=true
+https://your-app.test/laravel-app-documentation-editor?folderName=abc&filePath=documentation.md&edit-access=true
 ```
 
 ##### Example 2: Callback Method
@@ -115,7 +115,7 @@ https://your-app.test/document-editor?folderName=abc&filePath=documentation.md&e
 Configure the callback method, and that method should be static:
 
 ```php
-// In config/document-editor.php
+// In config/laravel-app-documentation-editor.php
 'auth' => [
     'enabled' => true,
     'method' => 'callback',
@@ -161,7 +161,7 @@ This package is open-sourced software licensed under the [MIT license](https://o
 
 ## ✨ Credits
 
-- [misusonu18](https://github.com/misusonu18)
+- [Mishal Parmar](https://github.com/misusonu18)
 
 ---
 

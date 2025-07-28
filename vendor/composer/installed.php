@@ -1,15 +1,24 @@
 <?php return array(
     'root' => array(
-        'name' => 'misusonu18/document-editor',
+        'name' => 'artisansplatform/laravel-app-documentation-editor',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'edc6a96077f3e31a424d190fe9e65a7036b4eae7',
+        'reference' => '45833124d8e4dfb3f45de5d9c34fda5f1ef710b5',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
         'dev' => true,
     ),
     'versions' => array(
+        'artisansplatform/laravel-app-documentation-editor' => array(
+            'pretty_version' => 'dev-main',
+            'version' => 'dev-main',
+            'reference' => '45833124d8e4dfb3f45de5d9c34fda5f1ef710b5',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../../',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'brianium/paratest' => array(
             'pretty_version' => 'v7.4.8',
             'version' => '7.4.8.0',
@@ -535,15 +544,6 @@
             'reference' => '08cfc6c4f3d811584fb09c37e2849e6a7f9b0742',
             'type' => 'library',
             'install_path' => __DIR__ . '/../league/uri-interfaces',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
-        'misusonu18/document-editor' => array(
-            'pretty_version' => 'dev-main',
-            'version' => 'dev-main',
-            'reference' => 'edc6a96077f3e31a424d190fe9e65a7036b4eae7',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
             'dev_requirement' => false,
         ),

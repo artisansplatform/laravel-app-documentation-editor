@@ -1,22 +1,22 @@
 {
-  "name": "misusonu18/document-editor",
+  "name": "artisansplatform/laravel-app-documentation-editor",
   "description": "Inline-injected Vite-powered document editor package",
   "type": "library",
   "license": "MIT",
   "autoload": {
     "psr-4": {
-      "Misusonu18\\DocumentEditor\\": "src/"
+      "Artisansplatform\\LaravelAppDocumentationEditor\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Misusonu18\\DocumentEditor\\Tests\\": "tests/"
+      "Artisansplatform\\LaravelAppDocumentationEditor\\Tests\\": "tests/"
     }
   },
   "extra": {
     "laravel": {
       "providers": [
-        "Misusonu18\\DocumentEditor\\Providers\\DocumentEditorServiceProvider"
+        "Artisansplatform\\LaravelAppDocumentationEditor\\Providers\\LaravelAppDocumentationEditorServiceProvider"
       ]
     }
   },

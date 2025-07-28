@@ -1,10 +1,10 @@
 <?php
 
-namespace Misusonu18\DocumentEditor;
+namespace Artisansplatform\LaravelAppDocumentationEditor;
 
 use Illuminate\Support\HtmlString;
 
-class DocumentEditor
+class LaravelAppDocumentationEditor
 {
     /**
      * Get CSS for the document editor

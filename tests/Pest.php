@@ -1,6 +1,6 @@
 <?php
 
-use Misusonu18\DocumentEditor\Tests\TestCase;
+use Artisansplatform\LaravelAppDocumentationEditor\Tests\TestCase;
 
 /*
 |--------------------------------------------------------------------------

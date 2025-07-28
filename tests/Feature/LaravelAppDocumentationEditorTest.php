@@ -1,20 +1,20 @@
 <?php
 
+use Artisansplatform\LaravelAppDocumentationEditor\Enums\MethodTypes;
+use Artisansplatform\LaravelAppDocumentationEditor\Services\DocumentService;
+use Artisansplatform\LaravelAppDocumentationEditor\Services\GithubService;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
-use Misusonu18\DocumentEditor\Services\DocumentService;
-use Misusonu18\DocumentEditor\Services\GithubService;
 
 beforeEach(function () {
     // Reset configuration before each test
     config([
-        'document-editor.document_path' => '/',
-        'document-editor.exclude_document_path' => [],
-        'document-editor.include_document_path' => [],
-        'document-editor.github.token' => 'test-token',
-        'document-editor.github.owner' => 'test-owner',
-        'document-editor.github.repository' => 'test-repo',
-        'document-editor.github.base_branch' => 'main',
+        'laravel-app-documentation-editor.include_document_path' => [],
+        'laravel-app-documentation-editor.github.token' => 'test-token',
+        'laravel-app-documentation-editor.github.owner' => 'test-owner',
+        'laravel-app-documentation-editor.github.repository' => 'test-repo',
+        'laravel-app-documentation-editor.github.base_branch' => 'main',
+        'laravel-app-documentation-editor.auth.method' => 'PARAMS',
     ]);
 });
 
@@ -45,7 +45,7 @@ it('lists files with include paths filtering', function () {
         ->with(base_path('/'))
         ->andReturn(collect([$mockFile1, $mockFile2, $mockFile3]));
 
-    config(['document-editor.include_document_path' => ['app']]);
+    config(['laravel-app-documentation-editor.include_document_path' => ['app']]);
 
     $service = new DocumentService;
     $result = $service->getFileLists();
@@ -82,7 +82,7 @@ it('excludes vendor and node_modules regardless of include paths', function () {
         ->with(base_path('/'))
         ->andReturn(collect([$mockFile1, $mockFile2, $mockFile3]));
 
-    config(['document-editor.include_document_path' => ['app']]);
+    config(['laravel-app-documentation-editor.include_document_path' => ['app']]);
 
     $service = new DocumentService;
     $result = $service->getFileLists();
@@ -111,7 +111,7 @@ it('applies exclude paths when no include paths specified', function () {
         ->with(base_path('/'))
         ->andReturn(collect([$mockFile1, $mockFile2]));
 
-    config(['document-editor.exclude_document_path' => ['temp']]);
+    config(['laravel-app-documentation-editor.exclude_document_path' => ['temp']]);
 
     $service = new DocumentService;
     $result = $service->getFileLists();
@@ -145,7 +145,7 @@ it('handles root folder inclusion with special values', function () {
         ->with(base_path('/'))
         ->andReturn(collect([$mockFile1, $mockFile2]));
 
-    config(['document-editor.include_document_path' => ['/']]);
+    config(['laravel-app-documentation-editor.include_document_path' => ['/']]);
 
     $service = new DocumentService;
     $result = $service->getFileLists();
@@ -477,7 +477,7 @@ it('completes full workflow from file listing to PR creation', function () {
         ], 201),
     ]);
 
-    config(['document-editor.include_document_path' => ['docs']]);
+    config(['laravel-app-documentation-editor.include_document_path' => ['docs']]);
 
     $service = new DocumentService;
 
@@ -514,7 +514,7 @@ it('handles case sensitivity in path filtering', function () {
         ->with(base_path('/'))
         ->andReturn(collect([$mockFile]));
 
-    config(['document-editor.include_document_path' => ['app']]);
+    config(['laravel-app-documentation-editor.include_document_path' => ['app']]);
 
     $service = new DocumentService;
     $result = $service->getFileLists();
@@ -527,8 +527,8 @@ it('handles empty and null configuration values', function () {
         ->with(base_path('/'))
         ->andReturn(collect([]));
 
-    config(['document-editor.include_document_path' => null]);
-    config(['document-editor.exclude_document_path' => null]);
+    config(['laravel-app-documentation-editor.include_document_path' => null]);
+    config(['laravel-app-documentation-editor.exclude_document_path' => null]);
 
     $service = new DocumentService;
     $result = $service->getFileLists();
@@ -677,10 +677,10 @@ it('handles markdown with only whitespace', function () {
 
 it('handles invalid GitHub configuration values', function () {
     config([
-        'document-editor.github.token' => null,
-        'document-editor.github.owner' => '',
-        'document-editor.github.repository' => null,
-        'document-editor.github.base_branch' => '',
+        'laravel-app-documentation-editor.github.token' => null,
+        'laravel-app-documentation-editor.github.owner' => '',
+        'laravel-app-documentation-editor.github.repository' => null,
+        'laravel-app-documentation-editor.github.base_branch' => '',
     ]);
 
     File::shouldReceive('exists')

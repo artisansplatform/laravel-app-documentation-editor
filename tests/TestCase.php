@@ -1,8 +1,8 @@
 <?php
 
-namespace Misusonu18\DocumentEditor\Tests;
+namespace Artisansplatform\LaravelAppDocumentationEditor\Tests;
 
-use Misusonu18\DocumentEditor\Providers\DocumentEditorServiceProvider;
+use Artisansplatform\LaravelAppDocumentationEditor\Providers\LaravelAppDocumentationEditorServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
@@ -10,7 +10,7 @@ class TestCase extends Orchestra
     protected function getPackageProviders($app): array
     {
         return [
-            DocumentEditorServiceProvider::class,
+            LaravelAppDocumentationEditorServiceProvider::class,
         ];
     }
 

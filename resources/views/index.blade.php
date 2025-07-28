@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document Manager - Dynamic Documentation</title>
 
-    {{ Misusonu18\DocumentEditor\DocumentEditor::css() }}
-    {{ Misusonu18\DocumentEditor\DocumentEditor::js() }}
+    {{ Artisansplatform\LaravelAppDocumentationEditor\LaravelAppDocumentationEditor::css() }}
+    {{ Artisansplatform\LaravelAppDocumentationEditor\LaravelAppDocumentationEditor::js() }}
 
 </head>
 <body>
@@ -40,7 +40,7 @@
                                         <h2 class="accordion-header">
                                             <a
                                                 class="accordion-button single-file-folder"
-                                                href="{{ route('document-editor.index', ['folderName' => $folder, 'filePath' => $files[0]['file_path']]) }}"
+                                                href="{{ route('laravel-app-documentation-editor.index', ['folderName' => $folder, 'filePath' => $files[0]['file_path']]) }}"
                                             >
                                                 <i class="fas fa-file-alt me-2 text-primary"></i>
                                                 {{ $folder }}
@@ -62,7 +62,7 @@
                                             data-bs-parent="#documentationAccordion">
                                             <div class="accordion-body">
                                                 @foreach($files as $file)
-                                                    <a href="{{ route('document-editor.index', ['folderName' => $file['file_name'], 'filePath' => $file['file_path']]) }}"
+                                                    <a href="{{ route('laravel-app-documentation-editor.index', ['folderName' => $file['file_name'], 'filePath' => $file['file_path']]) }}"
                                                         class="file-item"
                                                     >
                                                         <i class="fas fa-file-alt me-2"></i>
@@ -107,7 +107,7 @@
                                         <div>
                                             @if ($hasEditAccess && request()->has('filePath') && request()->has('folderName'))
                                                 <div>
-                                                    <a href="{{ route('document-editor.edit') }}?filePath={{ request()->string('filePath') }}&folderName={{ request()->string('folderName') }}"
+                                                    <a href="{{ route('laravel-app-documentation-editor.edit') }}?filePath={{ request()->string('filePath') }}&folderName={{ request()->string('folderName') }}"
                                                         class="btn btn-sm btn-primary">
                                                         Edit Document
                                                     </a>

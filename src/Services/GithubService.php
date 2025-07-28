@@ -1,6 +1,6 @@
 <?php
 
-namespace Misusonu18\DocumentEditor\Services;
+namespace Artisansplatform\LaravelAppDocumentationEditor\Services;
 
 use Exception;
 use Illuminate\Support\Facades\Http;
@@ -20,10 +20,10 @@ class GithubService
 
     public function __construct()
     {
-        $this->token = config('document-editor.github.token');
-        $this->repo = config('document-editor.github.repository');
-        $this->owner = config('document-editor.github.owner');
-        $this->baseBranch = config('document-editor.github.base_branch');
+        $this->token = config('laravel-app-documentation-editor.github.token');
+        $this->repo = config('laravel-app-documentation-editor.github.repository');
+        $this->owner = config('laravel-app-documentation-editor.github.owner');
+        $this->baseBranch = config('laravel-app-documentation-editor.github.base_branch');
     }
 
     /**

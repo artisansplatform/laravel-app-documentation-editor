@@ -1,17 +1,17 @@
 <?php
 
-namespace Misusonu18\DocumentEditor\Http\Controllers;
+namespace Artisansplatform\LaravelAppDocumentationEditor\Http\Controllers;
 
+use Artisansplatform\LaravelAppDocumentationEditor\Enums\MethodTypes;
+use Artisansplatform\LaravelAppDocumentationEditor\Services\DocumentService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
-use Misusonu18\DocumentEditor\Enums\MethodTypes;
-use Misusonu18\DocumentEditor\Services\DocumentService;
 
-class DocumentEditorController extends Controller
+class LaravelAppDocumentationEditorController extends Controller
 {
     public function __construct(protected DocumentService $documentService)
     {
@@ -21,7 +21,7 @@ class DocumentEditorController extends Controller
     {
         $menuList = Cache::remember('document_editor_menu_list', 60, fn (): array => $this->documentService->getFileLists());
 
-        if (config('document-editor.auth.method') === MethodTypes::PARAMS->name && $request->has(config('document-editor.auth.params_key')) && $request->boolean(config('document-editor.auth.params_key')) === config('document-editor.auth.params_value')) {
+        if (config('laravel-app-documentation-editor.auth.method') === MethodTypes::PARAMS->name && $request->has(config('laravel-app-documentation-editor.auth.params_key')) && $request->boolean(config('laravel-app-documentation-editor.auth.params_key')) === config('laravel-app-documentation-editor.auth.params_value')) {
             return $this->edit($request);
         }
 
@@ -29,7 +29,7 @@ class DocumentEditorController extends Controller
             $folderName = $request->string('folderName');
             $filePath = $request->string('filePath');
 
-            return view('document-editor::index', [
+            return view('laravel-app-documentation-editor::index', [
                 'directories' => $menuList,
                 'title' => $folderName,
                 'content' => $this->getFileContent($filePath),
@@ -37,7 +37,7 @@ class DocumentEditorController extends Controller
             ]);
         }
 
-        return view('document-editor::index', [
+        return view('laravel-app-documentation-editor::index', [
             'directories' => $menuList,
             'title' => 'Welcome To Document Manager',
             'hasEditAccess' => false,
@@ -52,7 +52,7 @@ class DocumentEditorController extends Controller
             return back()->with('error', 'File not found or does not exist.');
         }
 
-        return view('document-editor::manage', [
+        return view('laravel-app-documentation-editor::manage', [
             'content' => $this->documentService->getFile($filePath),
             'filePath' => $filePath,
         ]);
@@ -104,12 +104,12 @@ class DocumentEditorController extends Controller
 
     private function haveTheEditAccess(): bool
     {
-        if (! config('document-editor.auth.enabled')) {
+        if (! config('laravel-app-documentation-editor.auth.enabled')) {
             return true;
         }
 
-        if (config('document-editor.auth.method') === MethodTypes::CALLBACK->name) {
-            return app()->call(config('document-editor.auth.callback'));
+        if (config('laravel-app-documentation-editor.auth.method') === MethodTypes::CALLBACK->name) {
+            return app()->call(config('laravel-app-documentation-editor.auth.callback'));
         }
 
         return false;

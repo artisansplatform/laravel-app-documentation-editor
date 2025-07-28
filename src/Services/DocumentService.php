@@ -1,6 +1,6 @@
 <?php
 
-namespace Misusonu18\DocumentEditor\Services;
+namespace Artisansplatform\LaravelAppDocumentationEditor\Services;
 
 use Exception;
 use Illuminate\Support\Facades\File;
@@ -10,7 +10,7 @@ class DocumentService
 {
     public  function getFileLists(): array
     {
-        $includeDocumentPaths = config('document-editor.include_document_path');
+        $includeDocumentPaths = config('laravel-app-documentation-editor.include_document_path');
 
         $files = collect(File::allFiles(base_path('/')))
             ->reject(function ($file) use ($includeDocumentPaths): bool {
