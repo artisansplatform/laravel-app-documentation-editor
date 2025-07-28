@@ -14,7 +14,7 @@ $loader = (static function () {
     // Restore the backup and ensure the excluded files are properly marked as loaded
     $GLOBALS['__composer_autoload_files'] = \array_merge(
         $existingComposerAutoloadFiles,
-        \array_fill_keys(['5928a00fa978807cf85d90ec3f4b0147', '0e6d7bf4a5811bfa5cf40c5ccd6fae6a'], true)
+        \array_fill_keys(['0e6d7bf4a5811bfa5cf40c5ccd6fae6a', '5928a00fa978807cf85d90ec3f4b0147'], true)
     );
 
     return $loader;
@@ -30,7 +30,7 @@ if (!function_exists('humbug_phpscoper_expose_class')) {
     }
 }
 humbug_phpscoper_expose_class('AutoloadIncluder', 'RectorPrefix202507\AutoloadIncluder');
-humbug_phpscoper_expose_class('ComposerAutoloaderInitdb65f1617bfddbb41dc0dee4425e5c9b', 'RectorPrefix202507\ComposerAutoloaderInitdb65f1617bfddbb41dc0dee4425e5c9b');
+humbug_phpscoper_expose_class('ComposerAutoloaderInit941888f0a4b7e1c29bea2fa69da73b68', 'RectorPrefix202507\ComposerAutoloaderInit941888f0a4b7e1c29bea2fa69da73b68');
 humbug_phpscoper_expose_class('Product', 'RectorPrefix202507\Product');
 humbug_phpscoper_expose_class('SomeTest', 'RectorPrefix202507\SomeTest');
 

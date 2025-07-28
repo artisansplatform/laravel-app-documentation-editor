@@ -1,6 +1,5 @@
 <?php
 
-use Artisansplatform\LaravelAppDocumentationEditor\Enums\MethodTypes;
 use Artisansplatform\LaravelAppDocumentationEditor\Services\DocumentService;
 use Artisansplatform\LaravelAppDocumentationEditor\Services\GithubService;
 use Illuminate\Support\Facades\File;
