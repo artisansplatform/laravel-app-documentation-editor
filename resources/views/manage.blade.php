@@ -22,15 +22,15 @@
             </div>
         </div>
 
-        <div class="editor-sections row g-0 mt-5">
+        <div class="editor-sections row g-0 p-2">
             <!-- Markdown Editor -->
             <div class="editor-section">
-                <div class="section-title">
+                <div class="section-title p-2">
                     <span>Editor</span>
                 </div>
 
                 <div class="editor-content">
-                    <div id="editor" class="w-100 h-100"></div>
+                    <div id="editor" class="w-100 h-100 p-2"></div>
                 </div>
             </div>
 
@@ -46,9 +46,11 @@
         </div>
 
         <div class="editor-footer" style="padding: 1rem; display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
-            <button id="saveChangesButton" class="btn btn-primary">
-                Submit Changes
-            </button>
+            <span title="{{ !$hasSubmitApproval ? 'You need to configure GitHub credentials to submit changes.' : 'Proceed with submitting changes.' }}">
+                <button id="saveChangesButton" class="btn btn-primary" @if(!$hasSubmitApproval) disabled @endif>
+                    Submit Changes
+                </button>
+            </span>
         </div>
     </div>
 

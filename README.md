@@ -59,7 +59,6 @@ Set up GitHub integration for creating pull requests:
 
 ```php
 'github' => [
-    'enabled' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_ENABLED', false),
     'token' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_TOKEN'),
     'owner' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_OWNER'),
     'repository' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_REPOSITORY'),
