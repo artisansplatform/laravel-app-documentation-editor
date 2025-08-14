@@ -44,7 +44,7 @@ return [
     |
     */
     'auth' => [
-        // Enable or disable authentication
+        // Enable or disable editing
         'enabled' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_AUTH_ENABLED', false),
 
         'method' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_AUTH_METHOD', ''), // 'callback' or 'params'
