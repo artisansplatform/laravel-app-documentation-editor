@@ -28,7 +28,7 @@ Document Editor is a Laravel package that provides a modern, inline document edi
 ### Via Composer
 
 ```bash
-composer require Artisansplatform/laravel-app-documentation-editor
+composer require artisansplatform/laravel-app-documentation-editor
 ```
 
 ### Publish Configuration
