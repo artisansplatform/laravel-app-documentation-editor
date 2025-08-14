@@ -3,15 +3,6 @@
 return [
     /*
     |--------------------------------------------------------------------------
-    | Document Editor Configuration
-    |--------------------------------------------------------------------------
-    |
-    | This file contains configuration for the document editor package.
-    |
-    */
-
-    /*
-    |--------------------------------------------------------------------------
     | Include Document Path
     |--------------------------------------------------------------------------
     |
@@ -38,10 +29,10 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Authorization Settings
+    | Editing Settings
     |--------------------------------------------------------------------------
     |
-    | Simple authorization configuration for document management.
+    | Simple editing configuration for document editor.
     |
     */
     'auth' => [
