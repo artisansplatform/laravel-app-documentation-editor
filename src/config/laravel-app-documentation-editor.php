@@ -26,6 +26,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | Configure GitHub integration for creating pull requests.
+    | For token creation, please check the [Github Token Creation Docs](https://github.com/artisansplatform/laravel-app-documentation-editor/blob/main/github_token_creation.md)
     |
     */
     'github' => [
