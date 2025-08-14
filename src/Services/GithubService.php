@@ -26,6 +26,10 @@ class GithubService
         $this->baseBranch = config('laravel-app-documentation-editor.github.base_branch');
     }
 
+    public function isEnvConfigured(): bool {
+        return !is_null($this->token) && !is_null($this->repo) && !is_null($this->owner);
+    }
+
     /**
      * Create a pull request with the provided changes
      */

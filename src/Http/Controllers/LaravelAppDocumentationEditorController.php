@@ -4,6 +4,7 @@ namespace Artisansplatform\LaravelAppDocumentationEditor\Http\Controllers;
 
 use Artisansplatform\LaravelAppDocumentationEditor\Enums\MethodTypes;
 use Artisansplatform\LaravelAppDocumentationEditor\Services\DocumentService;
+use Artisansplatform\LaravelAppDocumentationEditor\Services\GithubService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ use Illuminate\Support\Facades\File;
 
 class LaravelAppDocumentationEditorController extends Controller
 {
-    public function __construct(protected DocumentService $documentService)
+    public function __construct(protected DocumentService $documentService, protected GithubService $githubService)
     {
     }
 
@@ -55,11 +56,16 @@ class LaravelAppDocumentationEditorController extends Controller
         return view('laravel-app-documentation-editor::manage', [
             'content' => $this->documentService->getFile($filePath),
             'filePath' => $filePath,
+            'hasSubmitApproval' => $this->githubService->isEnvConfigured()
         ]);
     }
 
     public function update(Request $request): array|RedirectResponse
     {
+        if (! $this->githubService->isEnvConfigured()) {
+            return back()->with('error', 'GitHub credentials are not configured.');
+        }
+        
         // Check if user has edit access
         if (! $this->haveTheEditAccess()) {
             return back()->with('error', 'You do not have permission to edit this document.');
@@ -104,10 +110,6 @@ class LaravelAppDocumentationEditorController extends Controller
 
     private function haveTheEditAccess(): bool
     {
-        if (! config('laravel-app-documentation-editor.auth.enabled')) {
-            return true;
-        }
-
         if (config('laravel-app-documentation-editor.auth.method') === MethodTypes::CALLBACK->name) {
             return app()->call(config('laravel-app-documentation-editor.auth.callback'));
         }

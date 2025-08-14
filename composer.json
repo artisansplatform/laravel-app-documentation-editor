@@ -51,6 +51,6 @@
       "email": "misusonu18@gmail.com"
     }
   ],
-  "minimum-stability": "dev",
+  "minimum-stability": "stable",
   "prefer-stable": true
 }
