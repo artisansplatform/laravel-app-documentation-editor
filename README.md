@@ -31,60 +31,20 @@ Document Editor is a Laravel package that provides a modern, inline document edi
 composer require artisansplatform/laravel-app-documentation-editor
 ```
 
-### Publish Configuration
+### Publish Configuration (Optional)
 
 ```bash
 # Publish the configuration file
 php artisan vendor:publish --provider="Artisansplatform\LaravelAppDocumentationEditor\Providers\LaravelAppDocumentationEditorServiceProvider" --tag="laravel-app-documentation-editor-config"
 ```
 
-## ⚙️ Configuration
+A new file `config/laravel-app-documentation-editor.php` will be created in the `config` directory of your Laravel app.
+You may check various config options provided by the package in that file.
 
-After publishing the configuration file, you can customize the package settings in `config/laravel-app-documentation-editor.php`:
 
-### Document Paths
+#### Authorisation Methods
 
-Configure which document paths to include in the editor:
-
-```php
-'include_document_path' => [
-    'docs',
-    'resources/docs'
-],
-```
-
-### GitHub Integration
-
-Set up GitHub integration for creating pull requests:
-
-```php
-'github' => [
-    'token' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_TOKEN'),
-    'owner' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_OWNER'),
-    'repository' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_REPOSITORY'),
-    'base_branch' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_BASE_BRANCH', 'main'),
-],
-```
-
-For token creation please check the [Github Token Creation Docs](github_token_creation.md)
-
-### Authorization
-
-Control who can edit documents:
-
-```php
-'auth' => [
-    'enabled' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_AUTH_ENABLED', true),
-    'method' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_AUTH_METHOD', 'params'), // 'callback' or 'params'
-    'params_key' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_AUTH_PARAMS_KEY', 'edit-by-pm'),
-    'params_value' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_AUTH_PARAMS_VALUE', true),
-    'callback' => [\App\Services\DocumentAuth::class, 'checkPermission'], // Your callback class and method
-],
-```
-
-#### Authorization Methods
-
-This package provides two authorization methods to control document editing permissions:
+This package provides two authorisation methods to control document editing permissions:
 
 1. **URL Parameters Method**: Simple access control using URL parameters
 2. **Callback Method**: Advanced access control using custom logic
