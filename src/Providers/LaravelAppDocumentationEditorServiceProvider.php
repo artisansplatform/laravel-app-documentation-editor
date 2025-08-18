@@ -59,7 +59,7 @@ class LaravelAppDocumentationEditorServiceProvider extends ServiceProvider
     protected function routeConfiguration(): array
     {
         return [
-            'prefix' => 'laravel-app-documentation-editor',
+            'prefix' => config('laravel-app-documentation-editor.url_name'),
             'middleware' => ['web'],
             'as' => 'laravel-app-documentation-editor.',
         ];

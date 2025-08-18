@@ -1,114 +1,73 @@
-# Document Editor for Laravel
+# Laravel App Documentation Editor
 
-A powerful, Vite-powered document editor package for Laravel applications that enables seamless in-app document editing with GitHub integration. Perfect for documentation sites, wikis, and content management systems.
-
-## 🔍 Overview
-
-Document Editor is a Laravel package that provides a modern, inline document editing experience directly within your application. It features a powerful markdown editor with WYSIWYG capabilities, GitHub integration for version control, and customizable authorization methods to control who can edit documents.
+Tired of switching between tools to update your docs? Our editor brings documentation management right into your Laravel app. Edit markdown files, preview changes instantly, and submit GitHub PRs—all in one sleek interface.
 
 ## ✨ Features
 
-- **Modern Markdown Editor** - Integrated Toast UI Editor with WYSIWYG capabilities
-- **GitHub Integration** - Create pull requests directly from the editor interface
-- **Flexible Authorization** - Customizable methods to control who can edit documents
-- **Responsive Design** - Modern Bootstrap 5 styling that works on all devices
-- **Path Configuration** - Include specific document paths by default it will take the root path.
-- **Version Control** - Compare changes with visual diffs before saving
-- **Event System** - Listen for editor events in your JavaScript
-
-## 📋 Requirements
-
-- PHP 8.2 or higher
-- Laravel 11.x
-- Composer
-- Node.js and npm (for building assets)
+- **📝 Modern Markdown Editor** - Rich editing with real-time preview
+- **🔄 GitHub Integration** - Create pull requests without leaving your app
+- **🔒 Flexible Authorization** - Control who can edit your documentation
+- **📱 Responsive Design** - Works beautifully on all devices
+- **🗂️ Document Browser** - Navigate your project files with ease
+- **👁️ Visual Diffs** - Compare changes before submitting
+- **🧩 Event System** - Hook into editor events from your JavaScript
 
 ## 📦 Installation
-
-### Via Composer
 
 ```bash
 composer require artisansplatform/laravel-app-documentation-editor
 ```
 
-### Publish Configuration (Optional)
+## 🔗 Access URL
+
+```
+https://your-app.com/laravel-app-documentation-editor/documentation
+```
+
+> **Note:** The URL path can be customized in the configuration file using the `url_name` setting.
+
+## ⚙️ Configuration (Optional)
+
+Publish the configuration file to customize paths, GitHub integration, and access control:
 
 ```bash
-# Publish the configuration file
 php artisan vendor:publish --provider="Artisansplatform\LaravelAppDocumentationEditor\Providers\LaravelAppDocumentationEditorServiceProvider" --tag="laravel-app-documentation-editor-config"
 ```
 
-A new file `config/laravel-app-documentation-editor.php` will be created in the `config` directory of your Laravel app.
-You may check various config options provided by the package in that file.
+This creates `config/laravel-app-documentation-editor.php` where you can set:
+- Document paths
+- GitHub repository details
+- Authorization methods
+- Custom URL name
 
+## 🔒 Authorization
 
-#### Authorisation Methods
+Control who can edit your documentation using flexible authorization methods:
 
-This package provides two authorisation methods to control document editing permissions:
+- URL Parameters Method - Simple access control via URL parameters
+- Callback Method - Advanced control with custom logic
 
-1. **URL Parameters Method**: Simple access control using URL parameters
-2. **Callback Method**: Advanced access control using custom logic
-
-##### Example 1: URL Parameters Method
-
-Configure the URL parameters method:
-
-```php
-// In config/laravel-app-documentation-editor.php
-'auth' => [
-    'enabled' => true,
-    'method' => 'params',
-    'params_key' => 'edit-access',
-    'params_value' => 'true',
-],
-```
-
-Then access the editor by adding the parameter to your URL:
-
-```
-https://your-app.test/laravel-app-documentation-editor?folderName=abc&filePath=documentation.md&edit-access=true
-```
-
-##### Example 2: Callback Method
-
-Configure the callback method, and that method should be static:
-
-```php
-// In config/laravel-app-documentation-editor.php
-'auth' => [
-    'enabled' => true,
-    'method' => 'callback',
-    'callback' => [\App\Services\DocumentAuth::class, 'checkPermission'],
-],
-```
-
-Create your authorization class:
-
-```php
-// File: app/Services/DocumentAuth.php
-namespace App\Services;
-
-class DocumentAuth
-{
-    public static function checkPermission()
-    {
-        // Your Logic Goes Here.
-    }
-}
-```
-
-### Document Structure
-
-The editor supports browsing and editing files in your Laravel project, with configurable paths and authorization methods. Files in the `vendor` and `node_modules` directories are automatically excluded.
+[See detailed authorization documentation](AUTHORIZATION.md)
 
 ## 🔄 GitHub Integration
 
-When GitHub integration is enabled, the package provides:
+Enable GitHub integration to submit document changes as pull requests:
 
-1. **Document Browser** - Navigate through project files
-2. **Markdown Editor** - Edit documents with real-time preview
-3. **Pull Request Creation** - Submit changes directly from the editor
-4. **Visual Diffs** - Compare changes with the original before submitting
+```php
+// In your .env file
+LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_TOKEN=your_token
+LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_OWNER=your_username
+LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_REPOSITORY=your_repo
+LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_BASE_BRANCH=main
+```
+
+For detailed instructions on creating a GitHub token, see the [GitHub Token Creation Guide](github_token_creation.md).
+
+## 📋 Requirements
+
+- PHP 8.2+
+- Laravel 11.x
+- Composer
 
 ## 🤝 Contributing
 
@@ -124,4 +83,4 @@ This package is open-sourced software licensed under the [MIT license](https://o
 
 ---
 
-Made with ❤️ for the Laravel community
+Made with ❤️ by [Artisans Platform](https://github.com/artisansplatform)

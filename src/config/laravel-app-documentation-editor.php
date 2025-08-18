@@ -13,6 +13,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Update The Url Name
+    |--------------------------------------------------------------------------
+    |
+    | Define the URL name to be used for the documentation editor. If not specified, a default URL name will be used.
+    |
+    */
+    'url_name' => env('LARAVEL_APP_DOCUMENTATION_EDITOR_URL_NAME', 'laravel-app-documentation-editor'),
+
+    /*
+    |--------------------------------------------------------------------------
     | GitHub Integration
     |--------------------------------------------------------------------------
     |
