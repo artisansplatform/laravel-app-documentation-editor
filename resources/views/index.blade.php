@@ -136,23 +136,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize floating elements
-            const floatingElements = document.querySelectorAll('.floating-element');
-
-            floatingElements.forEach((element, index) => {
-                // Random starting position
-                const randomLeft = Math.random() * 100;
-                element.style.left = randomLeft + 'vw';
-
-                // Random animation duration between 15s and 30s
-                const duration = 15 + Math.random() * 15;
-                element.style.animationDuration = duration + 's';
-
-                // Random animation delay
-                const delay = Math.random() * 10;
-                element.style.animationDelay = delay + 's';
-            });
-
             // Add mobile menu toggle button at the top of the content area for small screens
             const mainContent = document.querySelector('.main-content');
             const mobileMenuButton = document.createElement('button');

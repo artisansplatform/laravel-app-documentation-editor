@@ -5,6 +5,7 @@ namespace Artisansplatform\LaravelAppDocumentationEditor\Services;
 use Exception;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use Symfony\Component\Finder\Finder;
 
 class DocumentService
 {
@@ -12,53 +13,44 @@ class DocumentService
     {
         $includeDocumentPaths = config('laravel-app-documentation-editor.include_document_path');
 
-        $files = collect(File::allFiles(base_path('/')))
-            ->reject(function ($file) use ($includeDocumentPaths): bool {
-                $path = Str::lower($file->getPathname());
-                $relativePath = $file->getRelativePath();
+        $finder = new Finder();
+        $finder->files()
+            ->in(base_path())
+            ->exclude(['vendor', 'node_modules', 'storage'])
+            ->ignoreDotFiles(true)
+            ->name('*.md');
 
-                // Always exclude vendor and node_modules folders (highest priority)
-                if (
-                    Str::contains($path, DIRECTORY_SEPARATOR.'vendor'.DIRECTORY_SEPARATOR) ||
-                    Str::contains($path, DIRECTORY_SEPARATOR.'node_modules'.DIRECTORY_SEPARATOR)
-                ) {
-                    return true;
-                }
+        $files = collect($finder)->filter(function ($file) use ($includeDocumentPaths) {
+            $path = Str::lower($file->getPathname());
+            $relativePath = $file->getRelativePath();
 
-                // If include paths are specified, only include files from those paths
-                if (! empty($includeDocumentPaths)) {
-                    $isIncluded = collect($includeDocumentPaths)->contains(function ($includePath) use ($path, $relativePath) {
-                        // Include root folder if '/' or '' or '.' or 'root' is specified
-                        if (in_array($includePath, ['/', '', '.', 'root'])) {
-                            return $relativePath === '';
-                        }
-
-                        return Str::contains($path, $includePath);
-                    });
-
-                    // If include paths are specified but file is not included, reject it
-                    if (! $isIncluded) {
-                        return true;
+            if (! empty($includeDocumentPaths)) {
+                return collect($includeDocumentPaths)->contains(function ($includePath) use ($path, $relativePath) {
+                    $includePath = Str::lower(trim($includePath));
+                    if (in_array($includePath, ['/', '', '.', 'root'])) {
+                        return $relativePath === '';
                     }
-                }
+                    return Str::contains($path, $includePath);
+                });
+            }
 
-                // File passed all checks, don't reject it
-                return false;
-            })
-            ->filter(fn($file) => Str::endsWith($file->getFilename(), '.md'));
+            return true;
+        });
 
         $groupedFolders = $files->groupBy(fn($file): string => $this->prepareFormattedTitleForFolderName($file->getRelativePath()));
 
-        $menus = [];
-
-        foreach ($groupedFolders as $folderName => $groupedFolderFiles) {
-            $menus[$folderName] = $groupedFolderFiles->map(fn($file): array => [
-                'file_name' => $this->formattedTitleCaseFormat($file->getFilenameWithoutExtension()),
-                'file_path' => $file->getRelativePathname(),
-            ])->toArray();
-        }
-
-        return $menus;
+        return $groupedFolders->sortKeys()
+            ->map(
+                fn($group) =>
+                    $group
+                        ->map(fn($file) => [
+                            'file_name' => $this->formattedTitleCaseFormat($file->getFilenameWithoutExtension()),
+                            'file_path' => $file->getRelativePathname(),
+                        ])
+                        ->sortBy('file_name')
+                        ->values()
+                        ->toArray()
+            )->toArray();
     }
 
     public function getMarkdownFileAndConvertItToHtml(string $filePath): string
