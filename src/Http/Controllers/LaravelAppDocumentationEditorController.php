@@ -6,11 +6,13 @@ use Artisansplatform\LaravelAppDocumentationEditor\Enums\MethodTypes;
 use Artisansplatform\LaravelAppDocumentationEditor\Services\DocumentService;
 use Artisansplatform\LaravelAppDocumentationEditor\Services\GithubService;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
+use Throwable;
 
 class LaravelAppDocumentationEditorController extends Controller
 {
@@ -60,15 +62,15 @@ class LaravelAppDocumentationEditorController extends Controller
         ]);
     }
 
-    public function update(Request $request): array|RedirectResponse
+    public function update(Request $request): array|JsonResponse
     {
         if (! $this->githubService->isEnvConfigured()) {
-            return back()->with('error', 'GitHub credentials are not configured.');
+            return response()->json(['message' => 'GitHub credentials are not configured.'], 400);
         }
-        
+
         // Check if user has edit access
         if (! $this->haveTheEditAccess()) {
-            return back()->with('error', 'You do not have permission to edit this document.');
+            return response()->json(['message' => 'You do not have permission to edit this document.'], 403);
         }
 
         // Validate inputs
@@ -84,14 +86,18 @@ class LaravelAppDocumentationEditorController extends Controller
 
         // Check if file exists
         if (! File::exists(base_path($filePath))) {
-            return back()->with('error', 'File not found or does not exist.');
+            return response()->json(['message' => 'File not found or does not exist.'], 404);
         }
 
-        return $this->documentService->updateDocumentationUsingGithubPullRequest(
-            $filePath,
-            $stringable,
-            $content
-        );
+        try {
+            return $this->documentService->updateDocumentationUsingGithubPullRequest(
+                $filePath,
+                $stringable,
+                $content
+            );
+        } catch (Throwable $th) {
+            return response()->json(['message' => 'An error occurred: '.$th->getMessage()], 500);
+        }
     }
 
     private function getFileContent(string $filePath): string
@@ -114,6 +120,6 @@ class LaravelAppDocumentationEditorController extends Controller
             return app()->call(config('laravel-app-documentation-editor.auth.callback'));
         }
 
-        return false;
+        return true;
     }
 }
