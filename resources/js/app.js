@@ -3,7 +3,6 @@ import '../css/app.scss';
 import '@toast-ui/editor/dist/toastui-editor.css';
 import * as Diff from 'diff';
 import Editor from '@toast-ui/editor';
-import 'bootstrap';
 import Swal from 'sweetalert2';
 
 // Make libraries available globally
@@ -167,7 +166,7 @@ async function saveChanges(updateRoute) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     state.isSubmitting = true;
-    
+
     // Show the loading spinner
     Swal.fire({
         title: 'Saving changes...',
@@ -211,7 +210,7 @@ async function saveChanges(updateRoute) {
     } catch (error) {
         // Close the loading spinner in case of error
         Swal.close();
-        
+
         state.isSubmitting = false;
         Toast.fire({
             icon: 'error',
@@ -247,7 +246,7 @@ async function fetchWithLoader(url, options = {}, loadingMessage = 'Loading...')
             Swal.showLoading();
         }
     });
-    
+
     try {
         const response = await fetch(url, options);
         Swal.close();
