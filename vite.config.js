@@ -37,8 +37,10 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '~bootstrap': path.resolve(__dirname, 'node_modules/bootstrap'),
       '@': path.resolve(__dirname, 'resources/js'), // Optional: cleaner imports
     },
+  },
+  css: {
+    postcss: './postcss.config.js',
   },
 });

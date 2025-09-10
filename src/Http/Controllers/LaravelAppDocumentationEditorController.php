@@ -36,7 +36,7 @@ class LaravelAppDocumentationEditorController extends Controller
                 'directories' => $menuList,
                 'title' => $folderName,
                 'content' => $this->getFileContent($filePath),
-                'hasEditAccess' => $this->haveTheEditAccess(),
+                'hasEditAccess' => $this->haveTheEditButtonAccess(),
             ]);
         }
 
@@ -114,12 +114,25 @@ class LaravelAppDocumentationEditorController extends Controller
         return $this->documentService->getMarkdownFileAndConvertItToHtml($filePath);
     }
 
-    private function haveTheEditAccess(): bool
+    private function haveTheEditButtonAccess(): bool
     {
         if (config('laravel-app-documentation-editor.auth.method') === MethodTypes::CALLBACK->name) {
             return app()->call(config('laravel-app-documentation-editor.auth.callback'));
         }
 
-        return true;
+        return false;
+    }
+
+    private function haveTheEditAccess(): bool
+    {
+        if (config('laravel-app-documentation-editor.auth.enabled')) {
+            return true;
+        }
+
+        if (config('laravel-app-documentation-editor.auth.method') === MethodTypes::CALLBACK->name) {
+            return app()->call(config('laravel-app-documentation-editor.auth.callback'));
+        }
+
+        return false;
     }
 }
