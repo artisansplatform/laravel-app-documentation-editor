@@ -1,14 +1,27 @@
 // Import styles
-import '../css/app.scss';
+import '../css/app.css';
 import '@toast-ui/editor/dist/toastui-editor.css';
 import * as Diff from 'diff';
 import Editor from '@toast-ui/editor';
 import Swal from 'sweetalert2';
+import * as lucide from 'lucide';
+import { BookOpen, FileText, Folder, File, Save, Menu, Edit2, Edit3, Eye, ArrowLeft } from 'lucide';
 
 // Make libraries available globally
 window.Diff = Diff;
 window.Editor = Editor;
 window.Swal = Swal;
+
+// Configure Lucide icons
+const icons = { BookOpen, FileText, Folder, File, Save, Menu, Edit2, Edit3, Eye, ArrowLeft };
+window.createIcons = () => {
+    lucide.createIcons({
+        icons: icons
+    });
+};
+
+// Initialize Lucide icons
+window.createIcons();
 
 /**
  * Document Editor
@@ -103,16 +116,16 @@ function updateDiffPreview() {
     const lines = diff.map(part => {
         const escaped = escapeHtml(part.value);
         if (part.added) {
-            return `<div class="diff-line diff-added">+ ${escaped}</div>`;
+            return `<div class="diff-line py-1 px-2 bg-green-50 text-green-700 font-mono text-sm">+ ${escaped}</div>`;
         }
         if (part.removed) {
-            return `<div class="diff-line diff-removed">- ${escaped}</div>`;
+            return `<div class="diff-line py-1 px-2 bg-red-50 text-red-700 font-mono text-sm">- ${escaped}</div>`;
         }
-        return `<div class="diff-line diff-context">  ${escaped}</div>`;
+        return `<div class="diff-line py-1 px-2 text-gray-600 font-mono text-sm">  ${escaped}</div>`;
     }).join('');
 
     // Set diff preview with themed container
-    state.diffPreviewElement.innerHTML = `<div class="p-4 border rounded overflow-x-auto" style="background-color: var(--editor-content-bg); color: var(--editor-text); border-color: var(--editor-border);">${lines}</div>`;
+    state.diffPreviewElement.innerHTML = `<div class="p-4 rounded-lg overflow-x-auto bg-gray-50/50">${lines}</div>`;
 }
 
 /**
@@ -126,16 +139,35 @@ function escapeHtml(input) {
     return div.innerHTML;
 }
 
+// Custom styling for SweetAlert
+const customSwalTheme = window.Swal.mixin({
+    customClass: {
+        container: 'font-[Inter]',
+        popup: 'bg-white rounded-xl shadow-lg border border-gray-200',
+        title: 'text-lg font-semibold text-gray-800 pb-2',
+        htmlContainer: 'text-gray-600 text-sm',
+        confirmButton: 'px-4 py-2 bg-[#0F6FDE] hover:bg-[#0C5CBD] text-white text-sm font-semibold rounded-lg transition-colors duration-200',
+        cancelButton: 'px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition-colors duration-200',
+        actions: 'gap-2 pt-4'
+    },
+    buttonsStyling: false
+});
+
 const Toast = window.Swal.mixin({
-  toast: true,
-  position: "top-end",
-  showConfirmButton: false,
-  timer: 3000,
-  timerProgressBar: true,
-  didOpen: (toast) => {
-    toast.onmouseenter = Swal.stopTimer;
-    toast.onmouseleave = Swal.resumeTimer;
-  }
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    customClass: {
+        popup: 'bg-white rounded-lg shadow-md border border-gray-200 font-[Inter]',
+        title: 'text-gray-700 text-sm',
+        timerProgressBar: 'bg-[#0F6FDE]'
+    },
+    didOpen: (toast) => {
+        toast.onmouseenter = Swal.stopTimer;
+        toast.onmouseleave = Swal.resumeTimer;
+    }
 });
 
 /**
@@ -150,13 +182,16 @@ async function saveChanges(updateRoute) {
         return;
     }
 
-    const result = await Swal.fire({
+    const result = await customSwalTheme.fire({
         title: 'Save Changes?',
         text: 'Are you sure you want to save these changes?',
         icon: 'question',
         showCancelButton: true,
         confirmButtonText: 'Yes, save changes',
-        cancelButtonText: 'Cancel'
+        cancelButtonText: 'Cancel',
+        didOpen: () => {
+            createIcons();
+        }
     });
 
     if (!result.isConfirmed) {
@@ -168,7 +203,7 @@ async function saveChanges(updateRoute) {
     state.isSubmitting = true;
 
     // Show the loading spinner
-    Swal.fire({
+    customSwalTheme.fire({
         title: 'Saving changes...',
         html: 'Please wait while we save your changes',
         allowOutsideClick: false,
@@ -238,7 +273,7 @@ function destroyEditor() {
  */
 async function fetchWithLoader(url, options = {}, loadingMessage = 'Loading...') {
     // Show the loading spinner
-    Swal.fire({
+    customSwalTheme.fire({
         title: loadingMessage,
         allowOutsideClick: false,
         allowEscapeKey: false,
