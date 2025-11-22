@@ -13,7 +13,9 @@ class LaravelAppDocumentationEditorServiceProvider extends ServiceProvider
         $allowedModes = MethodTypes::values();
         $envMode = config('laravel-app-documentation-editor.auth.method', 'PARAMS');
 
-        if (!in_array($envMode, $allowedModes, true)) {
+        $isEnabled = config('laravel-app-documentation-editor.auth.enabled', false);
+
+        if (!in_array($envMode, $allowedModes, true) && $isEnabled) {
             throw new \InvalidArgumentException(sprintf("Invalid LARAVEL_APP_DOCUMENTATION_EDITOR_AUTH_METHOD: '%s'. Allowed values are: ", $envMode) . implode(', ', $allowedModes));
         }
 

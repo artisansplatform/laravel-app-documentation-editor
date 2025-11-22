@@ -116,6 +116,10 @@ class LaravelAppDocumentationEditorController extends Controller
 
     private function haveTheEditButtonAccess(): bool
     {
+        if (! config('laravel-app-documentation-editor.auth.enabled')) {
+            return true;
+        }
+
         if (config('laravel-app-documentation-editor.auth.method') === MethodTypes::CALLBACK->name) {
             return app()->call(config('laravel-app-documentation-editor.auth.callback'));
         }
