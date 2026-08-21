@@ -9,6 +9,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
@@ -16,8 +17,22 @@ use Throwable;
 
 class LaravelAppDocumentationEditorController extends Controller
 {
-    public function __construct(protected DocumentService $documentService, protected GithubService $githubService)
+    public function __construct(protected DocumentService $documentService, protected GithubService $githubService) {}
+
+    public function serveJs(): Response
     {
+        $path = __DIR__.'/../../../resources/dist/app.js';
+        $content = File::exists($path) ? File::get($path) : '';
+
+        return response($content, 200, ['Content-Type' => 'application/javascript; charset=utf-8']);
+    }
+
+    public function serveCss(): Response
+    {
+        $path = __DIR__.'/../../../resources/dist/style.css';
+        $content = File::exists($path) ? File::get($path) : '';
+
+        return response($content, 200, ['Content-Type' => 'text/css; charset=utf-8']);
     }
 
     public function index(Request $request): View|RedirectResponse
@@ -58,7 +73,7 @@ class LaravelAppDocumentationEditorController extends Controller
         return view('laravel-app-documentation-editor::manage', [
             'content' => $this->documentService->getFile($filePath),
             'filePath' => $filePath,
-            'hasSubmitApproval' => $this->githubService->isEnvConfigured()
+            'hasSubmitApproval' => $this->githubService->isEnvConfigured(),
         ]);
     }
 
@@ -129,7 +144,7 @@ class LaravelAppDocumentationEditorController extends Controller
 
     private function haveTheEditAccess(): bool
     {
-        if (config('laravel-app-documentation-editor.auth.enabled')) {
+        if (! config('laravel-app-documentation-editor.auth.enabled')) {
             return true;
         }
 

@@ -9,28 +9,20 @@ class LaravelAppDocumentationEditor
     /**
      * Get CSS for the document editor
      */
-    public static function css(): \Illuminate\Support\HtmlString
+    public static function css(): HtmlString
     {
-        // Load built CSS
-        $appCssPath = __DIR__.'/../resources/dist/style.css';
-        $appCssContent = file_exists($appCssPath) ? file_get_contents($appCssPath) : '';
+        $url = route('laravel-app-documentation-editor.assets.css');
 
-        return new HtmlString('
-            <style>'.$appCssContent.'</style>
-        ');
+        return new HtmlString('<link rel="stylesheet" href="'.$url.'">');
     }
 
     /**
      * Get JavaScript for the document editor
      */
-    public static function js(): \Illuminate\Support\HtmlString
+    public static function js(): HtmlString
     {
-        // Load built app.js
-        $appJsPath = __DIR__.'/../resources/dist/app.js';
-        $appJsContent = file_exists($appJsPath) ? file_get_contents($appJsPath) : '';
+        $url = route('laravel-app-documentation-editor.assets.js');
 
-        return new HtmlString('
-            <script>'.$appJsContent.'</script>
-        ');
+        return new HtmlString('<script src="'.$url.'"></script>');
     }
 }

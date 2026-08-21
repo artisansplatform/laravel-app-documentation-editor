@@ -1,6 +1,8 @@
 <?php
 
 use Artisansplatform\LaravelAppDocumentationEditor\Tests\TestCase;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 /*
 |--------------------------------------------------------------------------
@@ -41,7 +43,25 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+/**
+ * Write real files to a fresh temp directory, point the application's base
+ * path at it, and return the directory so the caller can clean it up.
+ *
+ * @param  array<string, string>  $files  Relative path => file contents.
+ */
+function createDocumentationFixture(array $files): string
 {
-    // ..
+    $root = sys_get_temp_dir().'/doc-editor-test-'.Str::random(8);
+
+    File::ensureDirectoryExists($root);
+
+    foreach ($files as $relativePath => $content) {
+        $fullPath = $root.DIRECTORY_SEPARATOR.ltrim($relativePath, '/');
+        File::ensureDirectoryExists(dirname($fullPath));
+        File::put($fullPath, $content);
+    }
+
+    app()->setBasePath($root);
+
+    return $root;
 }

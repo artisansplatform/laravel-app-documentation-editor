@@ -19,30 +19,11 @@ beforeEach(function () {
 
 // DocumentService File Listing Tests
 it('lists files with include paths filtering', function () {
-    $mockFile1 = $this->mock('SplFileInfo');
-    $mockFile1->shouldReceive('getPathname')->andReturn('/app/docs/readme.md');
-    $mockFile1->shouldReceive('getRelativePath')->andReturn('app/docs');
-    $mockFile1->shouldReceive('getFilename')->andReturn('readme.md');
-    $mockFile1->shouldReceive('getFilenameWithoutExtension')->andReturn('readme');
-    $mockFile1->shouldReceive('getRelativePathname')->andReturn('app/docs/readme.md');
-
-    $mockFile2 = $this->mock('SplFileInfo');
-    $mockFile2->shouldReceive('getPathname')->andReturn('/src/guide.md');
-    $mockFile2->shouldReceive('getRelativePath')->andReturn('src');
-    $mockFile2->shouldReceive('getFilename')->andReturn('guide.md');
-    $mockFile2->shouldReceive('getFilenameWithoutExtension')->andReturn('guide');
-    $mockFile2->shouldReceive('getRelativePathname')->andReturn('src/guide.md');
-
-    $mockFile3 = $this->mock('SplFileInfo');
-    $mockFile3->shouldReceive('getPathname')->andReturn('/vendor/test/file.md');
-    $mockFile3->shouldReceive('getRelativePath')->andReturn('vendor/test');
-    $mockFile3->shouldReceive('getFilename')->andReturn('file.md');
-    $mockFile3->shouldReceive('getFilenameWithoutExtension')->andReturn('file');
-    $mockFile3->shouldReceive('getRelativePathname')->andReturn('vendor/test/file.md');
-
-    File::shouldReceive('allFiles')
-        ->with(base_path('/'))
-        ->andReturn(collect([$mockFile1, $mockFile2, $mockFile3]));
+    $root = createDocumentationFixture([
+        'app/docs/readme.md' => '# Readme',
+        'src/guide.md' => '# Guide',
+        'vendor/test/file.md' => '# File',
+    ]);
 
     config(['laravel-app-documentation-editor.include_document_path' => ['app']]);
 
@@ -53,33 +34,16 @@ it('lists files with include paths filtering', function () {
     expect($result['Docs'])->toHaveCount(1);
     expect($result['Docs'][0]['file_name'])->toBe('Readme');
     expect($result['Docs'][0]['file_path'])->toBe('app/docs/readme.md');
+
+    File::deleteDirectory($root);
 });
 
 it('excludes vendor and node_modules regardless of include paths', function () {
-    $mockFile1 = $this->mock('SplFileInfo');
-    $mockFile1->shouldReceive('getPathname')->andReturn('/app/vendor/test.md');
-    $mockFile1->shouldReceive('getRelativePath')->andReturn('app/vendor');
-    $mockFile1->shouldReceive('getFilename')->andReturn('test.md');
-    $mockFile1->shouldReceive('getFilenameWithoutExtension')->andReturn('test');
-    $mockFile1->shouldReceive('getRelativePathname')->andReturn('app/vendor/test.md');
-
-    $mockFile2 = $this->mock('SplFileInfo');
-    $mockFile2->shouldReceive('getPathname')->andReturn('/app/node_modules/readme.md');
-    $mockFile2->shouldReceive('getRelativePath')->andReturn('app/node_modules');
-    $mockFile2->shouldReceive('getFilename')->andReturn('readme.md');
-    $mockFile2->shouldReceive('getFilenameWithoutExtension')->andReturn('readme');
-    $mockFile2->shouldReceive('getRelativePathname')->andReturn('app/node_modules/readme.md');
-
-    $mockFile3 = $this->mock('SplFileInfo');
-    $mockFile3->shouldReceive('getPathname')->andReturn('/app/docs/guide.md');
-    $mockFile3->shouldReceive('getRelativePath')->andReturn('app/docs');
-    $mockFile3->shouldReceive('getFilename')->andReturn('guide.md');
-    $mockFile3->shouldReceive('getFilenameWithoutExtension')->andReturn('guide');
-    $mockFile3->shouldReceive('getRelativePathname')->andReturn('app/docs/guide.md');
-
-    File::shouldReceive('allFiles')
-        ->with(base_path('/'))
-        ->andReturn(collect([$mockFile1, $mockFile2, $mockFile3]));
+    $root = createDocumentationFixture([
+        'app/vendor/test.md' => '# Test',
+        'app/node_modules/readme.md' => '# Readme',
+        'app/docs/guide.md' => '# Guide',
+    ]);
 
     config(['laravel-app-documentation-editor.include_document_path' => ['app']]);
 
@@ -89,60 +53,34 @@ it('excludes vendor and node_modules regardless of include paths', function () {
     expect($result)->toHaveKey('Docs');
     expect($result['Docs'])->toHaveCount(1);
     expect($result['Docs'][0]['file_name'])->toBe('Guide');
+
+    File::deleteDirectory($root);
 });
 
 it('applies exclude paths when no include paths specified', function () {
-    $mockFile1 = $this->mock('SplFileInfo');
-    $mockFile1->shouldReceive('getPathname')->andReturn('/docs/readme.md');
-    $mockFile1->shouldReceive('getRelativePath')->andReturn('docs');
-    $mockFile1->shouldReceive('getFilename')->andReturn('readme.md');
-    $mockFile1->shouldReceive('getFilenameWithoutExtension')->andReturn('readme');
-    $mockFile1->shouldReceive('getRelativePathname')->andReturn('docs/readme.md');
+    $root = createDocumentationFixture([
+        'docs/readme.md' => '# Readme',
+        'temp/guide.md' => '# Guide',
+    ]);
 
-    $mockFile2 = $this->mock('SplFileInfo');
-    $mockFile2->shouldReceive('getPathname')->andReturn('/temp/guide.md');
-    $mockFile2->shouldReceive('getRelativePath')->andReturn('temp');
-    $mockFile2->shouldReceive('getFilename')->andReturn('guide.md');
-    $mockFile2->shouldReceive('getFilenameWithoutExtension')->andReturn('guide');
-    $mockFile2->shouldReceive('getRelativePathname')->andReturn('temp/guide.md');
-
-    File::shouldReceive('allFiles')
-        ->with(base_path('/'))
-        ->andReturn(collect([$mockFile1, $mockFile2]));
-
+    // The DocumentService doesn't actually support exclude paths in its current implementation,
+    // so with no include paths both folders are returned.
     config(['laravel-app-documentation-editor.exclude_document_path' => ['temp']]);
 
     $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result)->toHaveKey('Docs');
-
-    // The DocumentService doesn't actually support exclude paths in its current implementation
-    // So we can't test for the exclusion of 'Temp'
-    // expect($result)->not->toHaveKey('Temp');
-
-    // Instead, we'll just check that the Docs key exists, which is enough
     expect($result['Docs'][0]['file_name'])->toBe('Readme');
+
+    File::deleteDirectory($root);
 });
 
 it('handles root folder inclusion with special values', function () {
-    $mockFile1 = $this->mock('SplFileInfo');
-    $mockFile1->shouldReceive('getPathname')->andReturn('/readme.md');
-    $mockFile1->shouldReceive('getRelativePath')->andReturn('');
-    $mockFile1->shouldReceive('getFilename')->andReturn('readme.md');
-    $mockFile1->shouldReceive('getFilenameWithoutExtension')->andReturn('readme');
-    $mockFile1->shouldReceive('getRelativePathname')->andReturn('readme.md');
-
-    $mockFile2 = $this->mock('SplFileInfo');
-    $mockFile2->shouldReceive('getPathname')->andReturn('/docs/guide.md');
-    $mockFile2->shouldReceive('getRelativePath')->andReturn('docs');
-    $mockFile2->shouldReceive('getFilename')->andReturn('guide.md');
-    $mockFile2->shouldReceive('getFilenameWithoutExtension')->andReturn('guide');
-    $mockFile2->shouldReceive('getRelativePathname')->andReturn('docs/guide.md');
-
-    File::shouldReceive('allFiles')
-        ->with(base_path('/'))
-        ->andReturn(collect([$mockFile1, $mockFile2]));
+    $root = createDocumentationFixture([
+        'readme.md' => '# Readme',
+        'docs/guide.md' => '# Guide',
+    ]);
 
     config(['laravel-app-documentation-editor.include_document_path' => ['/']]);
 
@@ -152,44 +90,35 @@ it('handles root folder inclusion with special values', function () {
     expect($result)->toHaveKey('/');
     expect($result['/'])->toHaveCount(1);
     expect($result['/'][0]['file_name'])->toBe('Readme');
+
+    File::deleteDirectory($root);
 });
 
 it('filters only markdown files', function () {
-    $mockFile1 = $this->mock('SplFileInfo');
-    $mockFile1->shouldReceive('getPathname')->andReturn('/docs/readme.md');
-    $mockFile1->shouldReceive('getRelativePath')->andReturn('docs');
-    $mockFile1->shouldReceive('getFilename')->andReturn('readme.md');
-    $mockFile1->shouldReceive('getFilenameWithoutExtension')->andReturn('readme');
-    $mockFile1->shouldReceive('getRelativePathname')->andReturn('docs/readme.md');
-
-    $mockFile2 = $this->mock('SplFileInfo');
-    $mockFile2->shouldReceive('getPathname')->andReturn('/docs/config.txt');
-    $mockFile2->shouldReceive('getRelativePath')->andReturn('docs');
-    $mockFile2->shouldReceive('getFilename')->andReturn('config.txt');
-    $mockFile2->shouldReceive('getFilenameWithoutExtension')->andReturn('config');
-    $mockFile2->shouldReceive('getRelativePathname')->andReturn('docs/config.txt');
-
-    File::shouldReceive('allFiles')
-        ->with(base_path('/'))
-        ->andReturn(collect([$mockFile1, $mockFile2]));
+    $root = createDocumentationFixture([
+        'docs/readme.md' => '# Readme',
+        'docs/config.txt' => 'not markdown',
+    ]);
 
     $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result['Docs'])->toHaveCount(1);
     expect($result['Docs'][0]['file_name'])->toBe('Readme');
+
+    File::deleteDirectory($root);
 });
 
 it('handles empty file collections', function () {
-    File::shouldReceive('allFiles')
-        ->with(base_path('/'))
-        ->andReturn(collect([]));
+    $root = createDocumentationFixture([]);
 
     $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result)->toBeArray();
     expect($result)->toBeEmpty();
+
+    File::deleteDirectory($root);
 });
 
 // DocumentService Markdown Conversion Tests
@@ -451,24 +380,9 @@ it('handles file content update failures', function () {
 
 // Integration Tests
 it('completes full workflow from file listing to PR creation', function () {
-    $mockFile = $this->mock('SplFileInfo');
-    $mockFile->shouldReceive('getPathname')->andReturn('/docs/api.md');
-    $mockFile->shouldReceive('getRelativePath')->andReturn('docs');
-    $mockFile->shouldReceive('getFilename')->andReturn('api.md');
-    $mockFile->shouldReceive('getFilenameWithoutExtension')->andReturn('api');
-    $mockFile->shouldReceive('getRelativePathname')->andReturn('docs/api.md');
-
-    File::shouldReceive('allFiles')
-        ->with(base_path('/'))
-        ->andReturn(collect([$mockFile]));
-
-    File::shouldReceive('exists')
-        ->with(base_path('/docs/api.md'))
-        ->andReturn(true);
-
-    File::shouldReceive('get')
-        ->with(base_path('/docs/api.md'))
-        ->andReturn('# API Documentation');
+    $root = createDocumentationFixture([
+        'docs/api.md' => '# API Documentation',
+    ]);
 
     Http::fake([
         '*' => Http::response([
@@ -498,20 +412,15 @@ it('completes full workflow from file listing to PR creation', function () {
 
     expect($result['message'])->toBe('Pull request created successfully!');
     expect($result['pr_url'])->toContain('github.com');
+
+    File::deleteDirectory($root);
 });
 
 // Edge Cases and Mutation Testing Coverage
 it('handles case sensitivity in path filtering', function () {
-    $mockFile = $this->mock('SplFileInfo');
-    $mockFile->shouldReceive('getPathname')->andReturn('/APP/docs/readme.md');
-    $mockFile->shouldReceive('getRelativePath')->andReturn('APP/docs');
-    $mockFile->shouldReceive('getFilename')->andReturn('readme.md');
-    $mockFile->shouldReceive('getFilenameWithoutExtension')->andReturn('readme');
-    $mockFile->shouldReceive('getRelativePathname')->andReturn('APP/docs/readme.md');
-
-    File::shouldReceive('allFiles')
-        ->with(base_path('/'))
-        ->andReturn(collect([$mockFile]));
+    $root = createDocumentationFixture([
+        'APP/docs/readme.md' => '# Readme',
+    ]);
 
     config(['laravel-app-documentation-editor.include_document_path' => ['app']]);
 
@@ -519,12 +428,12 @@ it('handles case sensitivity in path filtering', function () {
     $result = $service->getFileLists();
 
     expect($result)->toHaveKey('Docs');
+
+    File::deleteDirectory($root);
 });
 
 it('handles empty and null configuration values', function () {
-    File::shouldReceive('allFiles')
-        ->with(base_path('/'))
-        ->andReturn(collect([]));
+    $root = createDocumentationFixture([]);
 
     config(['laravel-app-documentation-editor.include_document_path' => null]);
     config(['laravel-app-documentation-editor.exclude_document_path' => null]);
@@ -534,114 +443,79 @@ it('handles empty and null configuration values', function () {
 
     expect($result)->toBeArray();
     expect($result)->toBeEmpty();
+
+    File::deleteDirectory($root);
 });
 
 it('tests file extension filtering edge cases', function () {
-    $mockFile1 = $this->mock('SplFileInfo');
-    $mockFile1->shouldReceive('getPathname')->andReturn('/docs/readme.MD');
-    $mockFile1->shouldReceive('getRelativePath')->andReturn('docs');
-    $mockFile1->shouldReceive('getFilename')->andReturn('readme.MD');
-    $mockFile1->shouldReceive('getFilenameWithoutExtension')->andReturn('readme');
-    $mockFile1->shouldReceive('getRelativePathname')->andReturn('docs/readme.MD');
-
-    $mockFile2 = $this->mock('SplFileInfo');
-    $mockFile2->shouldReceive('getPathname')->andReturn('/docs/file.markdown');
-    $mockFile2->shouldReceive('getRelativePath')->andReturn('docs');
-    $mockFile2->shouldReceive('getFilename')->andReturn('file.markdown');
-    $mockFile2->shouldReceive('getFilenameWithoutExtension')->andReturn('file');
-    $mockFile2->shouldReceive('getRelativePathname')->andReturn('docs/file.markdown');
-
-    File::shouldReceive('allFiles')
-        ->with(base_path('/'))
-        ->andReturn(collect([$mockFile1, $mockFile2]));
+    $root = createDocumentationFixture([
+        'docs/readme.MD' => '# Readme',
+        'docs/file.markdown' => '# File',
+    ]);
 
     $service = new DocumentService;
     $result = $service->getFileLists();
 
     // Should only include .md files, not .MD or .markdown
     expect($result)->toBeEmpty();
+
+    File::deleteDirectory($root);
 });
 
 it('tests folder name formatting with special characters', function () {
-    $mockFile = $this->mock('SplFileInfo');
-    $mockFile->shouldReceive('getPathname')->andReturn('/user_management/api-docs/readme.md');
-    $mockFile->shouldReceive('getRelativePath')->andReturn('user_management/api-docs');
-    $mockFile->shouldReceive('getFilename')->andReturn('readme.md');
-    $mockFile->shouldReceive('getFilenameWithoutExtension')->andReturn('readme');
-    $mockFile->shouldReceive('getRelativePathname')->andReturn('user_management/api-docs/readme.md');
-
-    File::shouldReceive('allFiles')
-        ->with(base_path('/'))
-        ->andReturn(collect([$mockFile]));
+    $root = createDocumentationFixture([
+        'user_management/api-docs/readme.md' => '# Readme',
+    ]);
 
     $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result)->toHaveKey('Api Docs');
+
+    File::deleteDirectory($root);
 });
 
 it('handles deeply nested directory structures', function () {
-    $mockFile = $this->mock('SplFileInfo');
-    $mockFile->shouldReceive('getPathname')->andReturn('/a/very/deep/nested/structure/file.md');
-    $mockFile->shouldReceive('getRelativePath')->andReturn('a/very/deep/nested/structure');
-    $mockFile->shouldReceive('getFilename')->andReturn('file.md');
-    $mockFile->shouldReceive('getFilenameWithoutExtension')->andReturn('file');
-    $mockFile->shouldReceive('getRelativePathname')->andReturn('a/very/deep/nested/structure/file.md');
-
-    File::shouldReceive('allFiles')
-        ->with(base_path('/'))
-        ->andReturn(collect([$mockFile]));
+    $root = createDocumentationFixture([
+        'a/very/deep/nested/structure/file.md' => '# File',
+    ]);
 
     $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result)->toHaveKey('Structure');
     expect($result['Structure'][0]['file_name'])->toBe('File');
+
+    File::deleteDirectory($root);
 });
 
 it('handles files with no extension gracefully', function () {
-    $mockFile = $this->mock('SplFileInfo');
-    $mockFile->shouldReceive('getPathname')->andReturn('/docs/README');
-    $mockFile->shouldReceive('getRelativePath')->andReturn('docs');
-    $mockFile->shouldReceive('getFilename')->andReturn('README');
-    $mockFile->shouldReceive('getFilenameWithoutExtension')->andReturn('README');
-    $mockFile->shouldReceive('getRelativePathname')->andReturn('docs/README');
-
-    File::shouldReceive('allFiles')
-        ->with(base_path('/'))
-        ->andReturn(collect([$mockFile]));
+    $root = createDocumentationFixture([
+        'docs/README' => '# Readme',
+    ]);
 
     $service = new DocumentService;
     $result = $service->getFileLists();
 
     // Should not include files without .md extension
     expect($result)->toBeEmpty();
+
+    File::deleteDirectory($root);
 });
 
 it('handles multiple files in same directory with different cases', function () {
-    $mockFile1 = $this->mock('SplFileInfo');
-    $mockFile1->shouldReceive('getPathname')->andReturn('/docs/readme.md');
-    $mockFile1->shouldReceive('getRelativePath')->andReturn('docs');
-    $mockFile1->shouldReceive('getFilename')->andReturn('readme.md');
-    $mockFile1->shouldReceive('getFilenameWithoutExtension')->andReturn('readme');
-    $mockFile1->shouldReceive('getRelativePathname')->andReturn('docs/readme.md');
-
-    $mockFile2 = $this->mock('SplFileInfo');
-    $mockFile2->shouldReceive('getPathname')->andReturn('/docs/documentation.md');
-    $mockFile2->shouldReceive('getRelativePath')->andReturn('docs');
-    $mockFile2->shouldReceive('getFilename')->andReturn('documentation.md');
-    $mockFile2->shouldReceive('getFilenameWithoutExtension')->andReturn('documentation');
-    $mockFile2->shouldReceive('getRelativePathname')->andReturn('docs/documentation.md');
-
-    File::shouldReceive('allFiles')
-        ->with(base_path('/'))
-        ->andReturn(collect([$mockFile1, $mockFile2]));
+    $root = createDocumentationFixture([
+        'docs/readme.md' => '# Readme',
+        'docs/documentation.md' => '# Documentation',
+    ]);
 
     $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result['Docs'])->toHaveCount(2);
     expect(collect($result['Docs'])->pluck('file_name')->toArray())->toContain('Readme', 'Documentation');
+
+    File::deleteDirectory($root);
 });
 
 it('handles empty markdown file conversion', function () {
@@ -696,23 +570,90 @@ it('handles invalid GitHub configuration values', function () {
 });
 
 it('handles extremely long file names and paths', function () {
-    $longName = str_repeat('very-long-name-', 20).'.md';
+    // Kept short of the ~255 byte filesystem filename limit while still exercising a long name/path.
+    $longName = str_repeat('very-long-name-', 10).'.md';
     $longPath = 'deeply/'.str_repeat('nested/', 10).'path';
 
-    $mockFile = $this->mock('SplFileInfo');
-    $mockFile->shouldReceive('getPathname')->andReturn('/'.$longPath.'/'.$longName);
-    $mockFile->shouldReceive('getRelativePath')->andReturn($longPath);
-    $mockFile->shouldReceive('getFilename')->andReturn($longName);
-    $mockFile->shouldReceive('getFilenameWithoutExtension')->andReturn(pathinfo($longName, PATHINFO_FILENAME));
-    $mockFile->shouldReceive('getRelativePathname')->andReturn($longPath.'/'.$longName);
-
-    File::shouldReceive('allFiles')
-        ->with(base_path('/'))
-        ->andReturn(collect([$mockFile]));
+    $root = createDocumentationFixture([
+        $longPath.'/'.$longName => '# Long',
+    ]);
 
     $service = new DocumentService;
     $result = $service->getFileLists();
 
     expect($result)->toHaveKey('Path');
     expect($result['Path'][0]['file_name'])->toContain('Very Long Name');
+
+    File::deleteDirectory($root);
+});
+
+// Access Control Tests
+it('allows submitting updates when auth is disabled by default', function () {
+    $root = createDocumentationFixture([
+        'docs/guide.md' => '# Guide',
+    ]);
+
+    config(['laravel-app-documentation-editor.auth.enabled' => false]);
+
+    Http::fake([
+        '*' => Http::response(['html_url' => 'https://github.com/test-owner/test-repo/pull/1'], 201),
+    ]);
+
+    $response = $this->postJson(route('laravel-app-documentation-editor.update'), [
+        'folderName' => 'Docs',
+        'filePath' => 'docs/guide.md',
+        'content' => '# Guide updated',
+    ]);
+
+    $response->assertOk();
+    $response->assertJsonPath('message', 'Pull request created successfully!');
+
+    File::deleteDirectory($root);
+});
+
+it('blocks submitting updates when auth is enabled without a satisfied callback', function () {
+    $root = createDocumentationFixture([
+        'docs/guide.md' => '# Guide',
+    ]);
+
+    config([
+        'laravel-app-documentation-editor.auth.enabled' => true,
+        'laravel-app-documentation-editor.auth.method' => 'PARAMS',
+    ]);
+
+    $response = $this->postJson(route('laravel-app-documentation-editor.update'), [
+        'folderName' => 'Docs',
+        'filePath' => 'docs/guide.md',
+        'content' => '# Guide updated',
+    ]);
+
+    $response->assertForbidden();
+    $response->assertJsonPath('message', 'You do not have permission to edit this document.');
+
+    File::deleteDirectory($root);
+});
+
+// Asset Route Tests
+it('serves the built javascript bundle with the correct content type', function () {
+    $response = $this->get(route('laravel-app-documentation-editor.assets.js'));
+
+    $response->assertOk();
+    $response->assertHeader('Content-Type', 'application/javascript; charset=utf-8');
+    expect($response->getContent())->not->toBeEmpty();
+});
+
+it('serves the built stylesheet with the correct content type', function () {
+    $response = $this->get(route('laravel-app-documentation-editor.assets.css'));
+
+    $response->assertOk();
+    $response->assertHeader('Content-Type', 'text/css; charset=utf-8');
+    expect($response->getContent())->not->toBeEmpty();
+});
+
+it('does not leak raw javascript into the documentation page', function () {
+    $response = $this->get(route('laravel-app-documentation-editor.index'));
+
+    $response->assertOk();
+    $response->assertSee('<script src="'.route('laravel-app-documentation-editor.assets.js').'"></script>', false);
+    $response->assertDontSee('@license', false);
 });
