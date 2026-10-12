@@ -2,6 +2,7 @@
 
 use Artisansplatform\LaravelAppDocumentationEditor\Tests\TestCase;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 /*
@@ -64,4 +65,30 @@ function createDocumentationFixture(array $files): string
     app()->setBasePath($root);
 
     return $root;
+}
+
+/**
+ * Fake every GitHub API call made while opening a pull request against the
+ * "main" base branch of test-owner/test-repo.
+ *
+ * @param  string  $baseFileContent  Content of the edited file on the base branch.
+ * @param  string  $baseFileSha  Blob SHA of the edited file on the base branch.
+ */
+function fakeGithubPullRequestFlow(
+    string $pullRequestUrl = 'https://github.com/test-owner/test-repo/pull/1',
+    string $baseFileContent = '# Base',
+    string $baseFileSha = 'base-file-sha',
+): void {
+    $repositoryUrl = 'https://api.github.com/repos/test-owner/test-repo';
+
+    Http::fake([
+        $repositoryUrl.'/git/ref/heads/main' => Http::response(['object' => ['sha' => 'base-commit-sha']], 200),
+        $repositoryUrl.'/git/refs' => Http::response(['ref' => 'refs/heads/update'], 201),
+        $repositoryUrl.'/contents/*' => Http::response([
+            'sha' => $baseFileSha,
+            'encoding' => 'base64',
+            'content' => chunk_split(base64_encode($baseFileContent), 60, "\n"),
+        ], 200),
+        $repositoryUrl.'/pulls' => Http::response(['html_url' => $pullRequestUrl], 201),
+    ]);
 }

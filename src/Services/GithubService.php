@@ -2,6 +2,7 @@
 
 namespace Artisansplatform\LaravelAppDocumentationEditor\Services;
 
+use Artisansplatform\LaravelAppDocumentationEditor\Exceptions\DocumentOutOfDateException;
 use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +17,7 @@ class GithubService
 
     protected string $apiBase = 'https://api.github.com/repos/';
 
-    protected ?string $baseBranch = 'https://api.github.com/repos/';
+    protected ?string $baseBranch = null;
 
     public function __construct()
     {
@@ -30,22 +31,63 @@ class GithubService
         return !is_null($this->token) && !is_null($this->repo) && !is_null($this->owner);
     }
 
-    /**
-     * Create a pull request with the provided changes
-     */
-    public function createPR(string $title, string $filePath, string $content, string $branchName = 'update-docs'): string
+    public function getBaseBranch(): ?string
     {
-        // 1. Create branch if it doesn't exist
+        return $this->baseBranch;
+    }
+
+    /**
+     * Get a file's content and blob SHA as it currently is on the base branch
+     *
+     * @return array{content: string, sha: string}|null Null when the file is not on the base branch or cannot be read
+     */
+    public function getFileFromBaseBranch(string $filePath): ?array
+    {
         try {
-            $this->createBranch($branchName);
+            $fileData = $this->request('GET', 'contents/'.ltrim($filePath, '/'), ['ref' => $this->baseBranch]);
         } catch (Exception) {
-            // Branch might already exist, continue
+            return null;
         }
 
-        // 2. Update file in the branch
+        // Files over 1 MB come back without inline content
+        if (($fileData['encoding'] ?? null) !== 'base64' || ! isset($fileData['content'], $fileData['sha'])) {
+            return null;
+        }
+
+        return [
+            'content' => base64_decode(str_replace("\n", '', $fileData['content'])),
+            'sha' => $fileData['sha'],
+        ];
+    }
+
+    /**
+     * Create a pull request with the provided changes
+     *
+     * @param  string|null  $expectedBaseSha  Blob SHA the edit was based on; when it no longer matches the base branch the PR is refused
+     */
+    public function createPR(string $title, string $filePath, string $content, string $branchName = 'update-docs', ?string $expectedBaseSha = null): string
+    {
+        $filePath = ltrim($filePath, '/');
+
+        // 1. Refuse to overwrite changes made on the base branch since the editor was opened
+        if ($expectedBaseSha !== null) {
+            $currentBaseSha = $this->getFileFromBaseBranch($filePath)['sha'] ?? null;
+
+            if ($currentBaseSha !== $expectedBaseSha) {
+                throw new DocumentOutOfDateException(sprintf(
+                    'This document was changed on the %s branch after you opened it. Reload the editor and apply your edits again.',
+                    $this->baseBranch
+                ));
+            }
+        }
+
+        // 2. Create the branch from the latest base branch commit
+        $this->createBranch($branchName);
+
+        // 3. Update file in the branch
         $this->updateFile($filePath, $content, $branchName);
 
-        // 3. Create the pull request
+        // 4. Create the pull request
         $prUrl = $this->createPullRequest($title, $branchName);
 
         return $prUrl;
@@ -57,7 +99,20 @@ class GithubService
     protected function createBranch(string $newBranch): void
     {
         // Get the latest commit SHA from the base branch
-        $commitSha = $this->request('GET', 'git/ref/heads/'.$this->baseBranch)['object']['sha'];
+        try {
+            $commitSha = $this->request('GET', 'git/ref/heads/'.$this->baseBranch)['object']['sha'] ?? null;
+        } catch (Exception) {
+            $commitSha = null;
+        }
+
+        if ($commitSha === null) {
+            throw new Exception(sprintf(
+                'Base branch "%s" could not be found in %s/%s. Check LARAVEL_APP_DOCUMENTATION_EDITOR_GITHUB_BASE_BRANCH.',
+                $this->baseBranch,
+                $this->owner,
+                $this->repo
+            ));
+        }
 
         // Create a new branch using that commit
         $this->request('POST', 'git/refs', [

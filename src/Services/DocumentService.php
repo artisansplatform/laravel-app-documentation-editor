@@ -81,6 +81,7 @@ class DocumentService
         string $filePath,
         string $moduleName,
         string $content,
+        ?string $baseSha = null,
     ): array {
         if (! File::exists(base_path('/'.$filePath))) {
             throw new Exception('The specified documentation file does not exist.');
@@ -95,7 +96,8 @@ class DocumentService
             $pullRequestTitle,
             $filePath,
             $content,
-            $newBranchName
+            $newBranchName,
+            $baseSha
         );
 
         return [

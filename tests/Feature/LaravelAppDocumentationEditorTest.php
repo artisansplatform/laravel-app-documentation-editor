@@ -217,11 +217,7 @@ it('creates pull request successfully', function () {
         ->with(base_path('/test-file.md'))
         ->andReturn(true);
 
-    Http::fake([
-        '*' => Http::response([
-            'html_url' => 'https://github.com/test-owner/test-repo/pull/123',
-        ], 201),
-    ]);
+    fakeGithubPullRequestFlow('https://github.com/test-owner/test-repo/pull/123');
 
     $service = new DocumentService;
     $result = $service->updateDocumentationUsingGithubPullRequest(
@@ -384,11 +380,7 @@ it('completes full workflow from file listing to PR creation', function () {
         'docs/api.md' => '# API Documentation',
     ]);
 
-    Http::fake([
-        '*' => Http::response([
-            'html_url' => 'https://github.com/test-owner/test-repo/pull/integration',
-        ], 201),
-    ]);
+    fakeGithubPullRequestFlow('https://github.com/test-owner/test-repo/pull/integration');
 
     config(['laravel-app-documentation-editor.include_document_path' => ['docs']]);
 
@@ -595,9 +587,7 @@ it('allows submitting updates when auth is disabled by default', function () {
 
     config(['laravel-app-documentation-editor.auth.enabled' => false]);
 
-    Http::fake([
-        '*' => Http::response(['html_url' => 'https://github.com/test-owner/test-repo/pull/1'], 201),
-    ]);
+    fakeGithubPullRequestFlow();
 
     $response = $this->postJson(route('laravel-app-documentation-editor.update'), [
         'folderName' => 'Docs',
@@ -656,4 +646,108 @@ it('does not leak raw javascript into the documentation page', function () {
     $response->assertOk();
     $response->assertSee('<script src="'.route('laravel-app-documentation-editor.assets.js').'"></script>', false);
     $response->assertDontSee('@license', false);
+});
+
+// Base branch editing
+it('reads a file and its sha from the base branch', function () {
+    fakeGithubPullRequestFlow(baseFileContent: "# Guide\n\nLatest on main.", baseFileSha: 'main-sha');
+
+    $baseBranchFile = (new GithubService)->getFileFromBaseBranch('/docs/guide.md');
+
+    expect($baseBranchFile)->toBe(['content' => "# Guide\n\nLatest on main.", 'sha' => 'main-sha']);
+
+    Http::assertSent(fn ($request) => $request->url() === 'https://api.github.com/repos/test-owner/test-repo/contents/docs/guide.md?ref=main');
+});
+
+it('returns null when the file is not on the base branch', function () {
+    Http::fake([
+        'https://api.github.com/repos/test-owner/test-repo/contents/*' => Http::response(['message' => 'Not Found'], 404),
+    ]);
+
+    expect((new GithubService)->getFileFromBaseBranch('docs/new.md'))->toBeNull();
+});
+
+it('opens the editor with the base branch version of the file', function () {
+    $root = createDocumentationFixture([
+        'docs/guide.md' => '# Guide (stale local copy)',
+    ]);
+
+    fakeGithubPullRequestFlow(baseFileContent: '# Guide (latest on main)', baseFileSha: 'main-sha');
+
+    $response = $this->get(route('laravel-app-documentation-editor.edit', ['filePath' => 'docs/guide.md', 'folderName' => 'Guide']));
+
+    $response->assertOk();
+    $response->assertSee('# Guide (latest on main)', false);
+    $response->assertDontSee('stale local copy', false);
+    $response->assertSee('baseSha: "main-sha"', false);
+
+    File::deleteDirectory($root);
+});
+
+it('falls back to the local file when the base branch cannot be read', function () {
+    $root = createDocumentationFixture([
+        'docs/guide.md' => '# Guide (local copy)',
+    ]);
+
+    Http::fake([
+        'https://api.github.com/repos/test-owner/test-repo/contents/*' => Http::response(['message' => 'Not Found'], 404),
+    ]);
+
+    $response = $this->get(route('laravel-app-documentation-editor.edit', ['filePath' => 'docs/guide.md', 'folderName' => 'Guide']));
+
+    $response->assertOk();
+    $response->assertSee('# Guide (local copy)', false);
+    $response->assertSee('Local copy, not main');
+
+    File::deleteDirectory($root);
+});
+
+it('refuses to open a pull request when the base branch changed since the editor loaded', function () {
+    $root = createDocumentationFixture([
+        'docs/guide.md' => '# Guide',
+    ]);
+
+    fakeGithubPullRequestFlow(baseFileSha: 'newer-main-sha');
+
+    $response = $this->postJson(route('laravel-app-documentation-editor.update'), [
+        'folderName' => 'Guide',
+        'filePath' => 'docs/guide.md',
+        'content' => '# Guide updated',
+        'baseSha' => 'sha-when-editor-opened',
+    ]);
+
+    $response->assertStatus(409);
+    expect($response->json('message'))->toContain('changed on the main branch');
+    Http::assertNotSent(fn ($request) => str_ends_with($request->url(), '/git/refs'));
+
+    File::deleteDirectory($root);
+});
+
+it('opens a pull request when the base branch is unchanged since the editor loaded', function () {
+    $root = createDocumentationFixture([
+        'docs/guide.md' => '# Guide',
+    ]);
+
+    fakeGithubPullRequestFlow(baseFileSha: 'main-sha');
+
+    $response = $this->postJson(route('laravel-app-documentation-editor.update'), [
+        'folderName' => 'Guide',
+        'filePath' => 'docs/guide.md',
+        'content' => '# Guide updated',
+        'baseSha' => 'main-sha',
+    ]);
+
+    $response->assertOk();
+    Http::assertSent(fn ($request) => $request->url() === 'https://api.github.com/repos/test-owner/test-repo/pulls' && $request['base'] === 'main');
+
+    File::deleteDirectory($root);
+});
+
+it('reports a missing base branch clearly', function () {
+    Http::fake([
+        'https://api.github.com/repos/test-owner/test-repo/git/ref/heads/main' => Http::response(['message' => 'Not Found'], 404),
+    ]);
+
+    expect(fn () => (new GithubService)->createPR('Title', 'docs/guide.md', 'Content', 'update-branch'))
+        ->toThrow(Exception::class, 'Base branch "main" could not be found in test-owner/test-repo.');
 });

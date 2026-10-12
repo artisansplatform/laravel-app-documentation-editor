@@ -2,188 +2,139 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer components {
-  .glass-bg {
-    @apply fixed inset-0 bg-white/80 backdrop-blur-sm dark:bg-slate-900/80;
-  }
-
-  .editor-header {
-    @apply sticky top-0 z-50 w-full backdrop-blur flex-none
-           transition-colors duration-500 border-b border-slate-900/10
-           dark:border-slate-50/[0.06] bg-white/75 dark:bg-slate-900/75 px-4 py-3;
-  }
-
-  .left-navbar {
-    @apply h-screen overflow-y-auto border-r border-slate-900/10
-           dark:border-slate-50/[0.06] bg-white/75 dark:bg-slate-900/75;
-  }
-
-  .editor-sections {
-    @apply grid grid-cols-1 md:grid-cols-2 gap-4 h-[calc(100vh-120px)];
-  }
-
-  .editor-section {
-    @apply bg-white dark:bg-slate-800 rounded-lg shadow-sm overflow-hidden;
-  }
-
-  .section-title {
-    @apply text-lg font-medium text-slate-900 dark:text-white p-4
-           border-b border-slate-200 dark:border-slate-700;
-  }
-
-  .editor-content {
-    @apply h-[calc(100%-60px)] overflow-auto;
-  }
-}
-
-.prose {
-    max-width: 100%;
-    color: var(--editor-text);
-    padding: 1.5rem;
-    border-radius: 0.375rem;
-    line-height: 1.7;
-}
-
-/* Diff view styling */
-.diff-container {
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-    padding: 1rem;
-    border-radius: 0.75rem;
-    overflow-x: auto;
-    color: var(--editor-text);
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.05);
-}
-
-.diff-line {
-    white-space: pre-wrap;
-    padding: 4px 10px;
-    margin: 2px 0;
-    border-left: 4px solid transparent;
-    background-color: var(--editor-content-bg);
-    border-radius: 0 4px 4px 0;
-    font-size: 0.95rem;
-    line-height: 1.5;
-    transition: all 0.2s ease;
-}
-
-.diff-line:hover {
-    filter: brightness(1.05);
-    transform: translateX(2px);
-}
-
-.diff-added {
-    background-color: var(--diff-added-bg);
-    border-color: var(--diff-added-border);
-    color: var(--diff-added-text);
-    box-shadow: inset 0 0 0 1px rgba(0, 255, 162, 0.5);
-    animation: fadeInRight 0.4s ease-out;
-    border-radius: 1.5rem;
-}
-
-.diff-removed {
-    background-color: var(--diff-removed-bg);
-    border-color: var(--diff-removed-border);
-    color: var(--diff-removed-text);
-    text-decoration: none;
-    box-shadow: inset 0 0 0 1px rgba(255, 30, 30, 0.5);
-    animation: fadeInLeft 0.4s ease-out;
-    border-radius: 1.5rem;
-}
-
-.diff-context {
-    color: var(--editor-text);
-    opacity: 0.8;
-}
-
-/* Animation keyframes */
-@keyframes fadeInRight {
-    from { opacity: 0; transform: translateX(10px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes fadeInLeft {
-    from { opacity: 0; transform: translateX(-10px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
+/* Rendered markdown */
 .document-content {
-    line-height: 1.6;
+    @apply prose-headings:scroll-mt-24 prose-headings:font-semibold prose-headings:tracking-tight
+           prose-a:font-medium prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+           prose-img:rounded-xl prose-hr:border-slate-200
+           dark:prose-a:text-blue-400 dark:prose-hr:border-slate-800;
 }
 
-.document-content h1,
-.document-content h2,
-.document-content h3,
-.document-content h4,
-.document-content h5,
-.document-content h6 {
-    margin-top: 1.5rem;
-    margin-bottom: 1rem;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    font-weight: 700;
-    line-height: 1.2;
+.document-content :where(code):not(:where(pre code)) {
+    @apply rounded-md bg-slate-100 px-1.5 py-0.5 text-[0.85em] font-medium text-slate-800
+           dark:bg-slate-800 dark:text-slate-200;
 }
 
-.document-content h1 {
-    font-size: 2.25rem;
-    color: #1a1a1a;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 0.5rem;
-}
-
-.document-content h2 {
-    font-size: 1.875rem;
-    color: #2d3748;
-}
-
-.document-content h3 {
-    font-size: 1.5rem;
-    color: #4a5568;
-}
-
-.document-content p {
-    margin-bottom: 1rem;
-}
-
-.document-content ul,
-.document-content ol {
-    margin-bottom: 1rem;
-    padding-left: 1.5rem;
-}
-
-.document-content code {
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    padding: 0.2rem 0.4rem;
-    border-radius: 0.25rem;
-    font-size: 0.875rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+.document-content :where(code):not(:where(pre code))::before,
+.document-content :where(code):not(:where(pre code))::after {
+    content: none;
 }
 
 .document-content pre {
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    padding: 1rem;
-    border-radius: 0.5rem;
-    overflow-x: auto;
-    margin-bottom: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    @apply rounded-xl bg-slate-900 text-[13px] leading-6 text-slate-100 ring-1 ring-slate-900/5
+           dark:bg-slate-900 dark:ring-white/10;
 }
 
-.document-content pre code {
-    background: transparent;
-    border: none;
-    padding: 0;
+.document-content table {
+    @apply block overflow-x-auto;
 }
 
-.card-body {
-    padding: 2rem;
-    background: rgba(255, 255, 255, 0.05);
+/* Toast UI editor, blended into the pane
+   (Toast sets an inline display on the tab container, so the tabs centre themselves) */
+.editor-pane .toastui-editor-defaultUI {
+    @apply rounded-none border-0 font-sans;
+}
+
+.editor-pane .toastui-editor-defaultUI .ProseMirror {
+    @apply text-sm leading-6;
+}
+
+.editor-pane .toastui-editor-defaultUI .toastui-editor-defaultUI-toolbar {
+    @apply rounded-none border-slate-200 bg-white px-3;
+}
+
+.editor-pane .toastui-editor-defaultUI .toastui-editor-md-tab-container {
+    @apply rounded-none border-slate-200 bg-white pl-3;
+}
+
+.editor-pane .toastui-editor-defaultUI .toastui-editor-md-tab-container .toastui-editor-tabs {
+    @apply relative top-1/2 m-0 flex h-auto -translate-y-1/2 gap-0.5 rounded-lg bg-slate-100 p-0.5;
+}
+
+.editor-pane .toastui-editor-md-preview .toastui-editor-contents {
+    @apply mx-auto max-w-3xl;
+}
+
+.editor-pane .toastui-editor-defaultUI .toastui-editor-md-tab-container .tab-item {
+    @apply m-0 h-7 w-auto rounded-md border-0 bg-transparent px-3 text-xs font-medium leading-7 text-slate-500;
+}
+
+.editor-pane .toastui-editor-defaultUI .toastui-editor-md-tab-container .tab-item.active {
+    @apply bg-white text-slate-900 shadow-sm;
+}
+
+.editor-pane .toastui-editor-dark.toastui-editor-defaultUI,
+.editor-pane .toastui-editor-dark.toastui-editor-defaultUI .toastui-editor-md-container {
+    @apply bg-slate-950;
+}
+
+.editor-pane .toastui-editor-dark.toastui-editor-defaultUI .toastui-editor-defaultUI-toolbar,
+.editor-pane .toastui-editor-dark.toastui-editor-defaultUI .toastui-editor-md-tab-container {
+    @apply border-slate-800 bg-slate-950;
+}
+
+.editor-pane .toastui-editor-dark.toastui-editor-defaultUI .toastui-editor-md-tab-container .toastui-editor-tabs {
+    @apply bg-slate-800;
+}
+
+.editor-pane .toastui-editor-dark.toastui-editor-defaultUI .toastui-editor-md-tab-container .tab-item {
+    @apply bg-transparent text-slate-400;
+}
+
+.editor-pane .toastui-editor-dark.toastui-editor-defaultUI .toastui-editor-md-tab-container .tab-item.active {
+    @apply bg-slate-700 text-white;
+}
+
+/* Toolbar buttons drawn with Lucide icons instead of Toast UI's sprite */
+.editor-pane .toastui-editor-defaultUI .toastui-editor-toolbar-icons {
+    @apply relative rounded-md border-transparent bg-none text-slate-500 dark:text-slate-400;
+}
+
+.editor-pane .toastui-editor-defaultUI .toastui-editor-toolbar-icons::before {
+    content: '';
+    @apply absolute inset-0 m-auto size-[18px] bg-current;
+    -webkit-mask: var(--toolbar-icon) center / contain no-repeat;
+    mask: var(--toolbar-icon) center / contain no-repeat;
+}
+
+.editor-pane .toastui-editor-defaultUI .toastui-editor-toolbar-icons:not(:disabled):hover {
+    @apply border-transparent bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white;
+}
+
+.editor-pane .toastui-editor-defaultUI .toastui-editor-toolbar-icons:not(:disabled).active {
+    @apply text-blue-600 dark:text-blue-400;
+}
+
+.editor-pane .toastui-editor-defaultUI .toastui-editor-toolbar-divider {
+    @apply bg-slate-200 dark:bg-slate-700;
+}
+
+/* Generated from lucide/dist/esm/icons */
+.editor-pane .toastui-editor-toolbar-icons.heading { --toolbar-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M6%2012h12%27%2F%3E%3Cpath%20d%3D%27M6%2020V4%27%2F%3E%3Cpath%20d%3D%27M18%2020V4%27%2F%3E%3C%2Fsvg%3E"); }
+.editor-pane .toastui-editor-toolbar-icons.bold { --toolbar-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M6%2012h9a4%204%200%200%201%200%208H7a1%201%200%200%201-1-1V5a1%201%200%200%201%201-1h7a4%204%200%200%201%200%208%27%2F%3E%3C%2Fsvg%3E"); }
+.editor-pane .toastui-editor-toolbar-icons.italic { --toolbar-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cline%20x1%3D%2719%27%20x2%3D%2710%27%20y1%3D%274%27%20y2%3D%274%27%2F%3E%3Cline%20x1%3D%2714%27%20x2%3D%275%27%20y1%3D%2720%27%20y2%3D%2720%27%2F%3E%3Cline%20x1%3D%2715%27%20x2%3D%279%27%20y1%3D%274%27%20y2%3D%2720%27%2F%3E%3C%2Fsvg%3E"); }
+.editor-pane .toastui-editor-toolbar-icons.strike { --toolbar-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M16%204H9a3%203%200%200%200-2.83%204%27%2F%3E%3Cpath%20d%3D%27M14%2012a4%204%200%200%201%200%208H6%27%2F%3E%3Cline%20x1%3D%274%27%20x2%3D%2720%27%20y1%3D%2712%27%20y2%3D%2712%27%2F%3E%3C%2Fsvg%3E"); }
+.editor-pane .toastui-editor-toolbar-icons.hrline { --toolbar-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M5%2012h14%27%2F%3E%3C%2Fsvg%3E"); }
+.editor-pane .toastui-editor-toolbar-icons.quote { --toolbar-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M17%206H3%27%2F%3E%3Cpath%20d%3D%27M21%2012H8%27%2F%3E%3Cpath%20d%3D%27M21%2018H8%27%2F%3E%3Cpath%20d%3D%27M3%2012v6%27%2F%3E%3C%2Fsvg%3E"); }
+.editor-pane .toastui-editor-toolbar-icons.bullet-list { --toolbar-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M3%2012h.01%27%2F%3E%3Cpath%20d%3D%27M3%2018h.01%27%2F%3E%3Cpath%20d%3D%27M3%206h.01%27%2F%3E%3Cpath%20d%3D%27M8%2012h13%27%2F%3E%3Cpath%20d%3D%27M8%2018h13%27%2F%3E%3Cpath%20d%3D%27M8%206h13%27%2F%3E%3C%2Fsvg%3E"); }
+.editor-pane .toastui-editor-toolbar-icons.ordered-list { --toolbar-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M10%2012h11%27%2F%3E%3Cpath%20d%3D%27M10%2018h11%27%2F%3E%3Cpath%20d%3D%27M10%206h11%27%2F%3E%3Cpath%20d%3D%27M4%2010h2%27%2F%3E%3Cpath%20d%3D%27M4%206h1v4%27%2F%3E%3Cpath%20d%3D%27M6%2018H4c0-1%202-2%202-3s-1-1.5-2-1%27%2F%3E%3C%2Fsvg%3E"); }
+.editor-pane .toastui-editor-toolbar-icons.task-list { --toolbar-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27m3%2017%202%202%204-4%27%2F%3E%3Cpath%20d%3D%27m3%207%202%202%204-4%27%2F%3E%3Cpath%20d%3D%27M13%206h8%27%2F%3E%3Cpath%20d%3D%27M13%2012h8%27%2F%3E%3Cpath%20d%3D%27M13%2018h8%27%2F%3E%3C%2Fsvg%3E"); }
+.editor-pane .toastui-editor-toolbar-icons.table { --toolbar-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M12%203v18%27%2F%3E%3Crect%20width%3D%2718%27%20height%3D%2718%27%20x%3D%273%27%20y%3D%273%27%20rx%3D%272%27%2F%3E%3Cpath%20d%3D%27M3%209h18%27%2F%3E%3Cpath%20d%3D%27M3%2015h18%27%2F%3E%3C%2Fsvg%3E"); }
+.editor-pane .toastui-editor-toolbar-icons.image { --toolbar-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Crect%20width%3D%2718%27%20height%3D%2718%27%20x%3D%273%27%20y%3D%273%27%20rx%3D%272%27%20ry%3D%272%27%2F%3E%3Ccircle%20cx%3D%279%27%20cy%3D%279%27%20r%3D%272%27%2F%3E%3Cpath%20d%3D%27m21%2015-3.086-3.086a2%202%200%200%200-2.828%200L6%2021%27%2F%3E%3C%2Fsvg%3E"); }
+.editor-pane .toastui-editor-toolbar-icons.link { --toolbar-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M10%2013a5%205%200%200%200%207.54.54l3-3a5%205%200%200%200-7.07-7.07l-1.72%201.71%27%2F%3E%3Cpath%20d%3D%27M14%2011a5%205%200%200%200-7.54-.54l-3%203a5%205%200%200%200%207.07%207.07l1.71-1.71%27%2F%3E%3C%2Fsvg%3E"); }
+.editor-pane .toastui-editor-toolbar-icons.code { --toolbar-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27m16%2018%206-6-6-6%27%2F%3E%3Cpath%20d%3D%27m8%206-6%206%206%206%27%2F%3E%3C%2Fsvg%3E"); }
+.editor-pane .toastui-editor-toolbar-icons.codeblock { --toolbar-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27m10%209-3%203%203%203%27%2F%3E%3Cpath%20d%3D%27m14%2015%203-3-3-3%27%2F%3E%3Crect%20x%3D%273%27%20y%3D%273%27%20width%3D%2718%27%20height%3D%2718%27%20rx%3D%272%27%2F%3E%3C%2Fsvg%3E"); }
+.editor-pane .toastui-editor-toolbar-icons.more { --toolbar-icon: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2024%2024%27%20fill%3D%27none%27%20stroke%3D%27black%27%20stroke-width%3D%272%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Ccircle%20cx%3D%2712%27%20cy%3D%2712%27%20r%3D%271%27%2F%3E%3Ccircle%20cx%3D%2719%27%20cy%3D%2712%27%20r%3D%271%27%2F%3E%3Ccircle%20cx%3D%275%27%20cy%3D%2712%27%20r%3D%271%27%2F%3E%3C%2Fsvg%3E"); }
+
+/* SweetAlert dialogs in dark mode */
+.dark .swal2-popup {
+    @apply bg-slate-900 text-slate-300;
+}
+
+.dark .swal2-title {
+    @apply text-white;
+}
+
+.dark .swal2-html-container {
+    @apply text-slate-400;
 }

@@ -1,11 +1,15 @@
 // Import styles
 import '../css/app.css';
 import '@toast-ui/editor/dist/toastui-editor.css';
+import '@toast-ui/editor/dist/theme/toastui-editor-dark.css';
 import * as Diff from 'diff';
 import Editor from '@toast-ui/editor';
 import Swal from 'sweetalert2';
 import * as lucide from 'lucide';
-import { BookOpen, FileText, Folder, File, Save, Menu, Edit2, Edit3, Eye, ArrowLeft } from 'lucide';
+import {
+    ArrowLeft, BookOpen, ChevronRight, Edit2, Edit3, Eye, File, FileText, Folder,
+    GitBranch, GitPullRequest, Menu, Moon, Pencil, Save, Search, Sun, TriangleAlert, X,
+} from 'lucide';
 
 // Make libraries available globally
 window.Diff = Diff;
@@ -13,15 +17,160 @@ window.Editor = Editor;
 window.Swal = Swal;
 
 // Configure Lucide icons
-const icons = { BookOpen, FileText, Folder, File, Save, Menu, Edit2, Edit3, Eye, ArrowLeft };
+const icons = {
+    ArrowLeft, BookOpen, ChevronRight, Edit2, Edit3, Eye, File, FileText, Folder,
+    GitBranch, GitPullRequest, Menu, Moon, Pencil, Save, Search, Sun, TriangleAlert, X,
+};
 window.createIcons = () => {
     lucide.createIcons({
         icons: icons
     });
 };
 
-// Initialize Lucide icons
-window.createIcons();
+/**
+ * Theme
+ * Follows the system preference until the user picks one explicitly.
+ */
+const THEME_STORAGE_KEY = 'laravel-app-documentation-editor-theme';
+const systemDarkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+function readStoredTheme() {
+    try {
+        return localStorage.getItem(THEME_STORAGE_KEY);
+    } catch (error) {
+        return null;
+    }
+}
+
+function isDarkTheme() {
+    return document.documentElement.classList.contains('dark');
+}
+
+function applyTheme(theme) {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+    document.dispatchEvent(new CustomEvent('documentation-editor:theme-change', { detail: { theme } }));
+}
+
+function toggleTheme() {
+    const nextTheme = isDarkTheme() ? 'light' : 'dark';
+    try {
+        localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    } catch (error) {
+        // Storage unavailable; the choice lasts for this page only.
+    }
+    applyTheme(nextTheme);
+}
+
+systemDarkQuery.addEventListener('change', (event) => {
+    if (readStoredTheme() === null) {
+        applyTheme(event.matches ? 'dark' : 'light');
+    }
+});
+
+/**
+ * Sidebar
+ * Off-canvas toggle on small screens and client-side filtering of the document list.
+ */
+function initSidebar() {
+    const sidebar = document.querySelector('[data-sidebar]');
+    if (!sidebar) {
+        return;
+    }
+
+    const backdrop = document.querySelector('[data-sidebar-backdrop]');
+    const setSidebarOpen = (isOpen) => {
+        sidebar.classList.toggle('-translate-x-full', !isOpen);
+        backdrop?.classList.toggle('hidden', !isOpen);
+    };
+
+    document.querySelectorAll('[data-sidebar-open]').forEach((button) => {
+        button.addEventListener('click', () => setSidebarOpen(true));
+    });
+    document.querySelectorAll('[data-sidebar-close]').forEach((button) => {
+        button.addEventListener('click', () => setSidebarOpen(false));
+    });
+    backdrop?.addEventListener('click', () => setSidebarOpen(false));
+
+    const filterInput = sidebar.querySelector('[data-nav-filter]');
+    if (!filterInput) {
+        return;
+    }
+
+    filterInput.addEventListener('input', () => filterNavigation(sidebar, filterInput.value));
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            setSidebarOpen(false);
+        }
+
+        const isTyping = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)
+            || document.activeElement?.isContentEditable;
+        if (event.key === '/' && !isTyping) {
+            event.preventDefault();
+            setSidebarOpen(true);
+            filterInput.focus();
+        }
+    });
+}
+
+function filterNavigation(sidebar, rawSearchTerm) {
+    const searchTerm = rawSearchTerm.trim().toLowerCase();
+    const matches = (element) => element.textContent.toLowerCase().includes(searchTerm);
+    let visibleEntryCount = 0;
+
+    sidebar.querySelectorAll('[data-nav-entry]').forEach((entry) => {
+        const group = entry.querySelector('details');
+
+        if (!group) {
+            const isVisible = matches(entry);
+            entry.classList.toggle('hidden', !isVisible);
+            visibleEntryCount += isVisible ? 1 : 0;
+            return;
+        }
+
+        const groupNameMatches = matches(group.querySelector('summary'));
+        let visibleChildCount = 0;
+
+        group.querySelectorAll('[data-nav-child]').forEach((child) => {
+            const isVisible = groupNameMatches || matches(child);
+            child.classList.toggle('hidden', !isVisible);
+            visibleChildCount += isVisible ? 1 : 0;
+        });
+
+        entry.classList.toggle('hidden', visibleChildCount === 0);
+        group.open = searchTerm ? visibleChildCount > 0 : group.hasAttribute('data-active-group');
+        visibleEntryCount += visibleChildCount > 0 ? 1 : 0;
+    });
+
+    sidebar.querySelector('[data-nav-empty]')?.classList.toggle('hidden', visibleEntryCount > 0);
+}
+
+/**
+ * Pane tabs
+ * Switches between the editor and changes panes on small screens.
+ */
+function initPaneTabs() {
+    const tabs = document.querySelectorAll('[data-pane-tab]');
+
+    tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+            tabs.forEach((otherTab) => {
+                const isSelected = otherTab === tab;
+                otherTab.setAttribute('aria-selected', String(isSelected));
+                document.querySelector(`[data-pane="${otherTab.dataset.paneTab}"]`)?.classList.toggle('hidden', !isSelected);
+            });
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.createIcons();
+    initSidebar();
+    initPaneTabs();
+    document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
+        button.addEventListener('click', toggleTheme);
+    });
+});
 
 /**
  * Document Editor
@@ -38,6 +187,7 @@ let state = {
     isSubmitting: false,
     filePath: '',
     folderName: '',
+    baseSha: null,
     indexUrl: '',
 };
 
@@ -51,6 +201,7 @@ function initEditor(options = {}) {
     state.currentContent = options.content || '';
     state.filePath = options.filePath || '';
     state.folderName = options.folderName || '';
+    state.baseSha = options.baseSha || null;
     state.indexUrl = options.indexUrl;
     state.diffPreviewElement = document.getElementById('diffPreview');
 
@@ -60,8 +211,9 @@ function initEditor(options = {}) {
     state.editor = new ToastEditor({
         el: document.getElementById('editor'),
         initialValue: state.currentContent,
-        previewStyle: 'none',
+        previewStyle: 'tab',
         height: '100%',
+        theme: isDarkTheme() ? 'dark' : 'light',
         usageStatistics: false,
         viewer: false,
         hideModeSwitch: true,
@@ -83,6 +235,35 @@ function initEditor(options = {}) {
 
     updateDiffPreview();
     calculateContentHeight();
+
+    // The rendered preview gets the full width; the diff only matters while writing
+    state.editor.on('changePreviewTabPreview', () => setChangesPaneVisible(false));
+    state.editor.on('changePreviewTabWrite', () => setChangesPaneVisible(true));
+
+    document.addEventListener('documentation-editor:theme-change', (event) => {
+        document.querySelector('#editor .toastui-editor-defaultUI')
+            ?.classList.toggle('toastui-editor-dark', event.detail.theme === 'dark');
+    });
+
+    window.addEventListener('beforeunload', (event) => {
+        if (hasUnsavedChanges() && !state.isSubmitting) {
+            event.preventDefault();
+            event.returnValue = '';
+        }
+    });
+}
+
+/**
+ * Show or hide the changes pane on wide screens
+ * @param {boolean} isVisible - Whether the changes pane should be shown
+ */
+function setChangesPaneVisible(isVisible) {
+    document.querySelector('[data-editor-layout]')?.classList.toggle('md:grid-cols-2', isVisible);
+    document.querySelector('[data-pane="changes"]')?.classList.toggle('md:flex', isVisible);
+}
+
+function hasUnsavedChanges() {
+    return state.currentContent !== state.originalContent;
 }
 
 /**
@@ -109,23 +290,91 @@ function updateDiffPreview() {
     const original = state.originalContent.trim();
     const current = state.currentContent.trim();
 
-    // Use the Diff library with fallback
-    const diffLib = window.Diff;
-    const diff = diffLib.diffLines(original, current);
+    const diffParts = window.Diff.diffLines(original, current);
+    let addedLineCount = 0;
+    let removedLineCount = 0;
 
-    const lines = diff.map(part => {
-        const escaped = escapeHtml(part.value);
-        if (part.added) {
-            return `<div class="diff-line py-1 px-2 bg-green-50 text-green-700 font-mono text-sm">+ ${escaped}</div>`;
-        }
-        if (part.removed) {
-            return `<div class="diff-line py-1 px-2 bg-red-50 text-red-700 font-mono text-sm">- ${escaped}</div>`;
-        }
-        return `<div class="diff-line py-1 px-2 text-gray-600 font-mono text-sm">  ${escaped}</div>`;
-    }).join('');
+    const rows = diffParts.flatMap((part) => {
+        const kind = part.added ? 'added' : (part.removed ? 'removed' : 'context');
+        const partLines = part.value.replace(/\n$/, '').split('\n');
 
-    // Set diff preview with themed container
-    state.diffPreviewElement.innerHTML = `<div class="p-4 rounded-lg overflow-x-auto bg-gray-50/50">${lines}</div>`;
+        if (kind === 'added') {
+            addedLineCount += partLines.length;
+        } else if (kind === 'removed') {
+            removedLineCount += partLines.length;
+        }
+
+        return partLines.map((line) => renderDiffRow(kind, line));
+    });
+
+    updateChangeIndicators(addedLineCount, removedLineCount);
+
+    if (addedLineCount === 0 && removedLineCount === 0) {
+        state.diffPreviewElement.innerHTML = `
+            <div class="flex h-full flex-col items-center justify-center px-6 py-20 text-center">
+                <p class="text-sm font-medium text-slate-700 dark:text-slate-300">No changes yet</p>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Edits you make will show up here as a line-by-line diff.</p>
+            </div>`;
+        return;
+    }
+
+    state.diffPreviewElement.innerHTML = `<div class="py-3">${rows.join('')}</div>`;
+}
+
+const diffRowStyles = {
+    added: {
+        marker: '+',
+        row: 'bg-emerald-50 text-emerald-900 dark:bg-emerald-500/10 dark:text-emerald-200',
+        gutter: 'text-emerald-600 dark:text-emerald-400',
+    },
+    removed: {
+        marker: '-',
+        row: 'bg-rose-50 text-rose-900 dark:bg-rose-500/10 dark:text-rose-200',
+        gutter: 'text-rose-600 dark:text-rose-400',
+    },
+    context: {
+        marker: '',
+        row: 'text-slate-500 dark:text-slate-400',
+        gutter: '',
+    },
+};
+
+/**
+ * Render a single diff line
+ * @param {'added'|'removed'|'context'} kind - Type of change
+ * @param {string} line - Raw line content
+ * @returns {string} - Row HTML
+ */
+function renderDiffRow(kind, line) {
+    const style = diffRowStyles[kind];
+
+    return `<div class="flex font-mono text-[13px] leading-6 ${style.row}">`
+        + `<span class="w-8 shrink-0 select-none text-center ${style.gutter}">${style.marker}</span>`
+        + `<span class="min-w-0 whitespace-pre-wrap break-words pr-4">${escapeHtml(line) || ' '}</span>`
+        + `</div>`;
+}
+
+/**
+ * Reflect the current diff in the header status and the changes pane
+ * @param {number} addedLineCount - Lines added
+ * @param {number} removedLineCount - Lines removed
+ */
+function updateChangeIndicators(addedLineCount, removedLineCount) {
+    const isDirty = hasUnsavedChanges();
+    const status = document.querySelector('[data-change-status]');
+
+    if (status) {
+        status.dataset.dirty = String(isDirty);
+        status.querySelector('[data-change-status-label]').textContent = isDirty ? 'Unsaved changes' : 'No changes';
+    }
+
+    const stats = document.querySelector('[data-diff-stats]');
+    if (stats) {
+        stats.innerHTML = isDirty
+            ? `<span class="text-emerald-600 dark:text-emerald-400">+${addedLineCount}</span> `
+                + `<span class="text-rose-600 dark:text-rose-400">-${removedLineCount}</span>`
+            : '';
+    }
 }
 
 /**
@@ -142,12 +391,12 @@ function escapeHtml(input) {
 // Custom styling for SweetAlert
 const customSwalTheme = window.Swal.mixin({
     customClass: {
-        container: 'font-[Inter]',
-        popup: 'bg-white rounded-xl shadow-lg border border-gray-200',
-        title: 'text-lg font-semibold text-gray-800 pb-2',
-        htmlContainer: 'text-gray-600 text-sm',
-        confirmButton: 'px-4 py-2 bg-[#0F6FDE] hover:bg-[#0C5CBD] text-white text-sm font-semibold rounded-lg transition-colors duration-200',
-        cancelButton: 'px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition-colors duration-200',
+        container: 'font-sans',
+        popup: 'rounded-xl shadow-xl border border-slate-200 dark:border-slate-800',
+        title: 'text-lg font-semibold text-slate-900 pb-2',
+        htmlContainer: 'text-slate-600 text-sm',
+        confirmButton: 'px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200',
+        cancelButton: 'px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium rounded-lg transition-colors duration-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200',
         actions: 'gap-2 pt-4'
     },
     buttonsStyling: false
@@ -160,9 +409,9 @@ const Toast = window.Swal.mixin({
     timer: 3000,
     timerProgressBar: true,
     customClass: {
-        popup: 'bg-white rounded-lg shadow-md border border-gray-200 font-[Inter]',
-        title: 'text-gray-700 text-sm',
-        timerProgressBar: 'bg-[#0F6FDE]'
+        popup: 'rounded-lg shadow-lg border border-slate-200 font-sans dark:border-slate-800',
+        title: 'text-slate-700 text-sm',
+        timerProgressBar: 'bg-blue-600'
     },
     didOpen: (toast) => {
         toast.onmouseenter = Swal.stopTimer;
@@ -224,7 +473,8 @@ async function saveChanges(updateRoute) {
             body: JSON.stringify({
                 content: state.currentContent,
                 filePath: state.filePath,
-                folderName: state.folderName
+                folderName: state.folderName,
+                baseSha: state.baseSha
             })
         });
 
@@ -239,6 +489,14 @@ async function saveChanges(updateRoute) {
                 title: data.message
             });
             window.location.href = state.indexUrl;
+        } else if (response.status === 409) {
+            // The base branch moved on; keep the user's edits on screen so they can copy them
+            state.isSubmitting = false;
+            customSwalTheme.fire({
+                icon: 'warning',
+                title: 'Document changed',
+                text: data.message,
+            });
         } else {
             throw new Error(data.message || 'Failed to save changes');
         }

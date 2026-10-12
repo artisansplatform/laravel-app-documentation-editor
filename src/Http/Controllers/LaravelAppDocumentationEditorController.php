@@ -3,6 +3,7 @@
 namespace Artisansplatform\LaravelAppDocumentationEditor\Http\Controllers;
 
 use Artisansplatform\LaravelAppDocumentationEditor\Enums\MethodTypes;
+use Artisansplatform\LaravelAppDocumentationEditor\Exceptions\DocumentOutOfDateException;
 use Artisansplatform\LaravelAppDocumentationEditor\Services\DocumentService;
 use Artisansplatform\LaravelAppDocumentationEditor\Services\GithubService;
 use Illuminate\Contracts\View\View;
@@ -70,10 +71,17 @@ class LaravelAppDocumentationEditorController extends Controller
             return back()->with('error', 'File not found or does not exist.');
         }
 
+        $hasSubmitApproval = $this->githubService->isEnvConfigured();
+
+        // Edit the base branch version so the pull request only contains the user's changes
+        $baseBranchFile = $hasSubmitApproval ? $this->githubService->getFileFromBaseBranch($filePath) : null;
+
         return view('laravel-app-documentation-editor::manage', [
-            'content' => $this->documentService->getFile($filePath),
+            'content' => $baseBranchFile['content'] ?? $this->documentService->getFile($filePath),
             'filePath' => $filePath,
-            'hasSubmitApproval' => $this->githubService->isEnvConfigured(),
+            'hasSubmitApproval' => $hasSubmitApproval,
+            'baseBranch' => $this->githubService->getBaseBranch(),
+            'baseSha' => $baseBranchFile['sha'] ?? null,
         ]);
     }
 
@@ -93,6 +101,7 @@ class LaravelAppDocumentationEditorController extends Controller
             'folderName' => 'required|string',
             'filePath' => 'required|string',
             'content' => 'required|string',
+            'baseSha' => 'nullable|string',
         ]);
 
         $stringable = $request->string('folderName');
@@ -108,8 +117,11 @@ class LaravelAppDocumentationEditorController extends Controller
             return $this->documentService->updateDocumentationUsingGithubPullRequest(
                 $filePath,
                 $stringable,
-                $content
+                $content,
+                $request->input('baseSha')
             );
+        } catch (DocumentOutOfDateException $documentOutOfDateException) {
+            return response()->json(['message' => $documentOutOfDateException->getMessage()], 409);
         } catch (Throwable $th) {
             return response()->json(['message' => 'An error occurred: '.$th->getMessage()], 500);
         }
