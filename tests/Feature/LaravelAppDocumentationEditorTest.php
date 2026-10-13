@@ -337,8 +337,8 @@ it('handles branch creation failures', function () {
             'object' => ['sha' => 'test-sha-123'],
         ], 200),
         'https://api.github.com/repos/test-owner/test-repo/git/refs' => Http::response([
-            'message' => 'Reference already exists',
-        ], 422),
+            'message' => 'Resource not accessible by integration',
+        ], 403),
     ]);
 
     $githubService = new GithubService;
@@ -347,8 +347,10 @@ it('handles branch creation failures', function () {
         'Test PR',
         'test.md',
         'Content',
-        'existing-branch'
-    ))->toThrow(Exception::class);
+        'new-branch'
+    ))->toThrow(Exception::class, 'Resource not accessible by integration');
+
+    Http::assertNotSent(fn ($request) => $request->method() === 'PUT');
 });
 
 it('handles file content update failures', function () {
@@ -750,4 +752,102 @@ it('reports a missing base branch clearly', function () {
 
     expect(fn () => (new GithubService)->createPR('Title', 'docs/guide.md', 'Content', 'update-branch'))
         ->toThrow(Exception::class, 'Base branch "main" could not be found in test-owner/test-repo.');
+});
+
+it('reuses an existing branch when creating a pull request', function () {
+    $repositoryUrl = 'https://api.github.com/repos/test-owner/test-repo';
+
+    Http::fake([
+        $repositoryUrl.'/git/ref/heads/main' => Http::response(['object' => ['sha' => 'base-commit-sha']], 200),
+        $repositoryUrl.'/git/refs' => Http::response(['message' => 'Reference already exists'], 422),
+        $repositoryUrl.'/contents/*' => Http::response(['sha' => 'file-sha'], 200),
+        $repositoryUrl.'/pulls' => Http::response(['html_url' => 'https://github.com/test-owner/test-repo/pull/9'], 201),
+    ]);
+
+    $pullRequestUrl = (new GithubService)->createPR('Title', 'docs/guide.md', 'Content');
+
+    expect($pullRequestUrl)->toBe('https://github.com/test-owner/test-repo/pull/9');
+    Http::assertSent(fn ($request) => $request->method() === 'PUT' && $request['branch'] === 'update-docs');
+});
+
+it('does not retry GitHub errors that cannot succeed on retry', function () {
+    Http::fake([
+        'https://api.github.com/repos/test-owner/test-repo/git/ref/heads/main' => Http::response(['object' => ['sha' => 'base-commit-sha']], 200),
+        'https://api.github.com/repos/test-owner/test-repo/git/refs' => Http::response(['message' => 'Bad credentials'], 401),
+    ]);
+
+    expect(fn () => (new GithubService)->createPR('Title', 'docs/guide.md', 'Content', 'new-branch'))->toThrow(Exception::class);
+
+    expect(Http::recorded(fn ($request) => str_ends_with($request->url(), '/git/refs')))->toHaveCount(1);
+});
+
+it('retries GitHub server errors', function () {
+    Http::fake([
+        'https://api.github.com/repos/test-owner/test-repo/contents/*' => Http::sequence()
+            ->push(['message' => 'Server Error'], 502)
+            ->push(['sha' => 'main-sha', 'encoding' => 'base64', 'content' => base64_encode('# Guide')], 200),
+    ]);
+
+    expect((new GithubService)->getFileFromBaseBranch('docs/guide.md'))->toBe(['content' => '# Guide', 'sha' => 'main-sha']);
+});
+
+it('reads the base branch only once when opening the editor', function () {
+    $root = createDocumentationFixture([
+        'docs/guide.md' => '# Guide (local copy)',
+    ]);
+
+    Http::fake([
+        'https://api.github.com/repos/test-owner/test-repo/contents/*' => Http::response(['message' => 'Server Error'], 502),
+    ]);
+
+    $this->get(route('laravel-app-documentation-editor.edit', ['filePath' => 'docs/guide.md', 'folderName' => 'Guide']))
+        ->assertOk()
+        ->assertSee('# Guide (local copy)', false);
+
+    Http::assertSentCount(1);
+
+    File::deleteDirectory($root);
+});
+
+it('does not report a document as changed when the base branch cannot be read on submit', function () {
+    $root = createDocumentationFixture([
+        'docs/guide.md' => '# Guide',
+    ]);
+
+    Http::fake([
+        'https://api.github.com/repos/test-owner/test-repo/contents/*' => Http::response(['message' => 'Server Error'], 502),
+    ]);
+
+    $response = $this->postJson(route('laravel-app-documentation-editor.update'), [
+        'folderName' => 'Guide',
+        'filePath' => 'docs/guide.md',
+        'content' => '# Guide updated',
+        'baseSha' => 'main-sha',
+    ]);
+
+    $response->assertStatus(500);
+    Http::assertNotSent(fn ($request) => str_ends_with($request->url(), '/git/refs'));
+
+    File::deleteDirectory($root);
+});
+
+it('uses a unique branch for every submission', function () {
+    $root = createDocumentationFixture([
+        'docs/guide.md' => '# Guide',
+    ]);
+
+    fakeGithubPullRequestFlow();
+
+    $service = new DocumentService;
+    $service->updateDocumentationUsingGithubPullRequest('docs/guide.md', 'Guide', 'First edit');
+    $service->updateDocumentationUsingGithubPullRequest('docs/guide.md', 'Guide', 'Second edit');
+
+    $branchNames = Http::recorded(fn ($request) => str_ends_with($request->url(), '/pulls'))
+        ->map(fn (array $recordedPair) => $recordedPair[0]['head']);
+
+    expect($branchNames)->toHaveCount(2)
+        ->and($branchNames->unique())->toHaveCount(2)
+        ->and($branchNames->first())->toMatch('/^update-documentation-guide-\\d+-[a-z0-9]{6}$/');
+
+    File::deleteDirectory($root);
 });

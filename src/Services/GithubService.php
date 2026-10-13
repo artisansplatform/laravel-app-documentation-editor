@@ -3,9 +3,13 @@
 namespace Artisansplatform\LaravelAppDocumentationEditor\Services;
 
 use Artisansplatform\LaravelAppDocumentationEditor\Exceptions\DocumentOutOfDateException;
+use Artisansplatform\LaravelAppDocumentationEditor\Exceptions\GithubRequestException;
 use Exception;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Psr\Log\LoggerInterface;
 
 class GithubService
 {
@@ -39,23 +43,58 @@ class GithubService
     /**
      * Get a file's content and blob SHA as it currently is on the base branch
      *
+     * @param  bool  $failFast  Use a short timeout and no retries, for callers that have a fallback
      * @return array{content: string, sha: string}|null Null when the file is not on the base branch or cannot be read
      */
-    public function getFileFromBaseBranch(string $filePath): ?array
+    public function getFileFromBaseBranch(string $filePath, bool $failFast = false): ?array
     {
         try {
-            $fileData = $this->request('GET', 'contents/'.ltrim($filePath, '/'), ['ref' => $this->baseBranch]);
+            $baseBranchFile = $this->readBaseBranchFile($filePath, $failFast);
         } catch (Exception) {
             return null;
         }
 
         // Files over 1 MB come back without inline content
-        if (($fileData['encoding'] ?? null) !== 'base64' || ! isset($fileData['content'], $fileData['sha'])) {
+        if ($baseBranchFile === null || $baseBranchFile['content'] === null) {
             return null;
         }
 
+        return $baseBranchFile;
+    }
+
+    /**
+     * Read a file from the base branch
+     *
+     * @return array{content: string|null, sha: string}|null Null when the file is not on the base branch
+     *
+     * @throws Exception When GitHub cannot be reached or answers with an error other than 404
+     */
+    protected function readBaseBranchFile(string $filePath, bool $failFast = false): ?array
+    {
+        try {
+            $fileData = $this->request(
+                'GET',
+                'contents/'.ltrim($filePath, '/'),
+                ['ref' => $this->baseBranch],
+                retryTimes: $failFast ? 1 : 3,
+                timeoutSeconds: $failFast ? 5 : null,
+            );
+        } catch (GithubRequestException $githubRequestException) {
+            if ($githubRequestException->status === 404) {
+                return null;
+            }
+
+            throw $githubRequestException;
+        }
+
+        if (! isset($fileData['sha'])) {
+            return null;
+        }
+
+        $hasInlineContent = ($fileData['encoding'] ?? null) === 'base64' && isset($fileData['content']);
+
         return [
-            'content' => base64_decode(str_replace("\n", '', $fileData['content'])),
+            'content' => $hasInlineContent ? base64_decode(str_replace("\n", '', $fileData['content'])) : null,
             'sha' => $fileData['sha'],
         ];
     }
@@ -70,8 +109,9 @@ class GithubService
         $filePath = ltrim($filePath, '/');
 
         // 1. Refuse to overwrite changes made on the base branch since the editor was opened
+        // A failed read throws instead of being mistaken for a changed document
         if ($expectedBaseSha !== null) {
-            $currentBaseSha = $this->getFileFromBaseBranch($filePath)['sha'] ?? null;
+            $currentBaseSha = $this->readBaseBranchFile($filePath)['sha'] ?? null;
 
             if ($currentBaseSha !== $expectedBaseSha) {
                 throw new DocumentOutOfDateException(sprintf(
@@ -115,10 +155,20 @@ class GithubService
         }
 
         // Create a new branch using that commit
-        $this->request('POST', 'git/refs', [
-            'ref' => 'refs/heads/'.$newBranch,
-            'sha' => $commitSha,
-        ]);
+        try {
+            $this->request('POST', 'git/refs', [
+                'ref' => 'refs/heads/'.$newBranch,
+                'sha' => $commitSha,
+            ]);
+        } catch (GithubRequestException $githubRequestException) {
+            // An existing branch is reused; any other failure is real
+            $branchAlreadyExists = $githubRequestException->status === 422
+                && str_contains($githubRequestException->body, 'Reference already exists');
+
+            if (! $branchAlreadyExists) {
+                throw $githubRequestException;
+            }
+        }
     }
 
     /**
@@ -161,28 +211,41 @@ class GithubService
     /**
      * Make a request to the GitHub API
      */
-    protected function request(string $method, string $endpoint, array $data = []): array
+    protected function request(string $method, string $endpoint, array $data = [], int $retryTimes = 3, ?int $timeoutSeconds = null): array
     {
         $url = $this->apiBase.sprintf('%s/%s/', $this->owner, $this->repo).ltrim($endpoint, '/');
 
+        // Only retry failures that can succeed on a second try
+        $isRetryable = fn (Exception $exception): bool => $exception instanceof ConnectionException
+            || ($exception instanceof RequestException && $exception->response->serverError());
+
         $response = Http::withToken($this->token)
-            ->retry(3, 100)
+            ->retry($retryTimes, 100, $isRetryable, throw: false)
+            ->when($timeoutSeconds !== null, fn ($pendingRequest) => $pendingRequest->timeout($timeoutSeconds))
             ->{strtolower($method)}($url, $data);
 
         if ($response->failed()) {
-            Log::channel('github')->error('GitHub API failed: '.$endpoint, [
+            $this->logger()->error('GitHub API failed: '.$method.' '.$endpoint, [
                 'status' => $response->status(),
                 'body' => $response->body(),
             ]);
 
-            throw new Exception('GitHub API error: '.$response->body());
+            throw new GithubRequestException($response->status(), $response->body());
         }
 
-        Log::channel('github')->error('GitHub API success: '.$endpoint, [
+        // Response bodies can hold whole documents, so only the status is logged
+        $this->logger()->debug('GitHub API success: '.$method.' '.$endpoint, [
             'status' => $response->status(),
-            'body' => $response->body(),
         ]);
 
-        return $response->json();
+        return $response->json() ?? [];
+    }
+
+    /**
+     * Log to the "github" channel when the application defines one, otherwise to the default channel
+     */
+    protected function logger(): LoggerInterface
+    {
+        return config('logging.channels.github') !== null ? Log::channel('github') : Log::channel();
     }
 }

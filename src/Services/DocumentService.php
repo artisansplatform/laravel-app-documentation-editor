@@ -88,7 +88,8 @@ class DocumentService
         }
 
         $pullRequestTitle = 'Update the documentation of '.$moduleName;
-        $newBranchName = 'update-documentation-'.Str::slug($moduleName).'-'.time();
+        // The random suffix keeps two submits in the same second off the same branch
+        $newBranchName = 'update-documentation-'.Str::slug($moduleName).'-'.time().'-'.Str::lower(Str::random(6));
 
         $githubService = new GithubService;
 

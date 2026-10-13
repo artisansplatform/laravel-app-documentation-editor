@@ -163,14 +163,21 @@ function initPaneTabs() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function initPage() {
     window.createIcons();
     initSidebar();
     initPaneTabs();
     document.querySelectorAll('[data-theme-toggle]').forEach((button) => {
         button.addEventListener('click', toggleTheme);
     });
-});
+}
+
+// Works whether the script is loaded in the head or after the page has parsed
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPage);
+} else {
+    initPage();
+}
 
 /**
  * Document Editor
@@ -260,6 +267,22 @@ function initEditor(options = {}) {
 function setChangesPaneVisible(isVisible) {
     document.querySelector('[data-editor-layout]')?.classList.toggle('md:grid-cols-2', isVisible);
     document.querySelector('[data-pane="changes"]')?.classList.toggle('md:flex', isVisible);
+}
+
+/**
+ * URL of the document being edited, falling back to the documentation home
+ * @returns {string}
+ */
+function documentUrl() {
+    if (!state.filePath || !state.folderName) {
+        return state.indexUrl;
+    }
+
+    const url = new URL(state.indexUrl, window.location.origin);
+    url.searchParams.set('folderName', state.folderName);
+    url.searchParams.set('filePath', state.filePath);
+
+    return url.toString();
 }
 
 function hasUnsavedChanges() {
@@ -484,11 +507,25 @@ async function saveChanges(updateRoute) {
         const data = await response.json();
 
         if (response.ok) {
-            Toast.fire({
-                icon: "success",
-                title: data.message
+            // Wait for the user to close the dialog; redirecting right away hid the confirmation
+            const pullRequestLink = data.pr_url
+                ? `<a href="${escapeHtml(data.pr_url)}" target="_blank" rel="noopener" class="mt-3 inline-flex items-center gap-1.5 font-medium text-blue-600 hover:underline dark:text-blue-400">View pull request &rarr;</a>`
+                : '';
+
+            const confirmation = data.pr_url
+                ? 'Your changes will appear on this page once the pull request is merged.'
+                : 'Your changes were submitted.';
+
+            await customSwalTheme.fire({
+                icon: 'success',
+                // titleText renders as plain text; title would render the server message as HTML
+                titleText: data.message || 'Pull request created',
+                html: `<p>${confirmation}</p>${pullRequestLink}`,
+                confirmButtonText: 'Back to document',
+                allowOutsideClick: false,
             });
-            window.location.href = state.indexUrl;
+
+            window.location.href = documentUrl();
         } else if (response.status === 409) {
             // The base branch moved on; keep the user's edits on screen so they can copy them
             state.isSubmitting = false;

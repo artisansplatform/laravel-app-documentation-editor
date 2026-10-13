@@ -74,7 +74,7 @@ class LaravelAppDocumentationEditorController extends Controller
         $hasSubmitApproval = $this->githubService->isEnvConfigured();
 
         // Edit the base branch version so the pull request only contains the user's changes
-        $baseBranchFile = $hasSubmitApproval ? $this->githubService->getFileFromBaseBranch($filePath) : null;
+        $baseBranchFile = $hasSubmitApproval ? $this->githubService->getFileFromBaseBranch($filePath, failFast: true) : null;
 
         return view('laravel-app-documentation-editor::manage', [
             'content' => $baseBranchFile['content'] ?? $this->documentService->getFile($filePath),
