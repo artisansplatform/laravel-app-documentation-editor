@@ -66,7 +66,7 @@ For detailed instructions on creating a GitHub token, see the [GitHub Token Crea
 ## 📋 Requirements
 
 - PHP 8.2+
-- Laravel 11.x
+- Laravel 10.x, 11.x, 12.x, or 13.x (Laravel 13 requires PHP 8.3+)
 - Composer
 
 ## 🤝 Contributing
