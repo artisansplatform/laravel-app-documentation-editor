@@ -513,8 +513,8 @@ async function saveChanges(updateRoute) {
                 : '';
 
             const confirmation = data.pr_url
-                ? 'Your changes will appear on this page once the pull request is merged.'
-                : 'Your changes were submitted.';
+                ? 'Your changes have been submitted as a pull request for review.'
+                : 'Your changes have been submitted.';
 
             await customSwalTheme.fire({
                 icon: 'success',
