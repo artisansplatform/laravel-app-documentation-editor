@@ -81,13 +81,15 @@ class DocumentService
         string $filePath,
         string $moduleName,
         string $content,
+        ?string $baseSha = null,
     ): array {
         if (! File::exists(base_path('/'.$filePath))) {
             throw new Exception('The specified documentation file does not exist.');
         }
 
         $pullRequestTitle = 'Update the documentation of '.$moduleName;
-        $newBranchName = 'update-documentation-'.Str::slug($moduleName).'-'.time();
+        // The random suffix keeps two submits in the same second off the same branch
+        $newBranchName = 'update-documentation-'.Str::slug($moduleName).'-'.time().'-'.Str::lower(Str::random(6));
 
         $githubService = new GithubService;
 
@@ -95,7 +97,8 @@ class DocumentService
             $pullRequestTitle,
             $filePath,
             $content,
-            $newBranchName
+            $newBranchName,
+            $baseSha
         );
 
         return [

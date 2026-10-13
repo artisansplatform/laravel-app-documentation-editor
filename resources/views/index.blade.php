@@ -1,145 +1,147 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document Manager - Dynamic Documentation</title>
-
-    {{ Artisansplatform\LaravelAppDocumentationEditor\LaravelAppDocumentationEditor::css() }}
-    {{ Artisansplatform\LaravelAppDocumentationEditor\LaravelAppDocumentationEditor::js() }}
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @include('laravel-app-documentation-editor::partials.head', ['pageTitle' => ($title ?? 'Documentation').' · Documentation'])
 </head>
-<body class="overflow-hidden font-[Inter] bg-gradient-to-br from-slate-100 via-slate-50 to-slate-100">
-    <script>
-        // Initialize after app.js is loaded
-        function initializePage() {
-            if (typeof window.createIcons === 'function') {
-                window.createIcons();
-                const menuBtn = document.getElementById('menuBtn');
-                const sidebar = document.getElementById('sidebar');
-                menuBtn.addEventListener('click', () => {
-                    sidebar.classList.toggle('hidden');
-                    sidebar.classList.toggle('fixed');
-                    sidebar.classList.toggle('inset-0');
-                    sidebar.classList.toggle('z-50');
-                });
-            }
-        }
+<body class="h-full overflow-hidden bg-white font-sans text-slate-700 antialiased dark:bg-slate-950 dark:text-slate-300">
+    @php
+        $activeFilePath = request()->string('filePath')->value();
+    @endphp
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializePage);
-        } else {
-            initializePage();
-        }
-    </script>
-    <div class="relative grid grid-cols-1 md:grid-cols-12 h-screen transition-all duration-500 ease-in-out">
-        <button id="menuBtn" class="md:hidden fixed top-4 right-4 z-50 p-2 bg-white/80 backdrop-blur-xl rounded-lg shadow-md border border-slate-200/50 transition-all duration-300 hover:bg-slate-50">
-            <i data-lucide="menu" class="w-6 h-6 text-slate-600"></i>
-        </button>
-        <aside id="sidebar" class="hidden md:block md:col-span-3 border-r border-slate-200/60 bg-slate-50/90 backdrop-blur-xl shadow-[0_0_40px_-15px_rgba(0,0,0,0.15)] h-screen transition-all duration-500 ease-in-out transform hover:shadow-lg overflow-y-auto">
-            <div class="flex flex-col h-full border-e border-slate-200/50 bg-gradient-to-b from-slate-50/90 to-white/80">
-            <div class="flex flex-col h-full border-e border-gray-100/50 bg-gradient-to-b from-white/80 to-gray-50/80 overflow-hidden">
-                <div class="px-4 py-2 flex flex-col h-full">
-                    <div class="flex-shrink-0">
-                        <div class="flex items-center px-6 py-6 border-b border-gray-200/50 bg-gradient-to-r from-white via-gray-50/80 to-blue-50/30">
-                            <div class="flex items-center gap-4 group">
-                                <div class="p-2.5 bg-gradient-to-br from-blue-500/15 to-blue-600/20 rounded-xl shadow-sm transition-all duration-300 ease-in-out group-hover:shadow-md group-hover:from-blue-500/20 group-hover:to-blue-600/25">
-                                    <i data-lucide="book-open" class="w-6 h-6 text-blue-600/90 transition-colors duration-300 ease-in-out group-hover:text-blue-700"></i>
-                                </div>
-                                <span class="text-2xl font-semibold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent tracking-tight">Document Manager</span>
-                            </div>
-                        </div>
-                    </div>
+    <div class="flex h-full">
+        <div data-sidebar-backdrop class="fixed inset-0 z-30 hidden bg-slate-900/40 backdrop-blur-sm lg:hidden"></div>
 
-                    <ul role="list" class="px-3 space-y-1.5 overflow-y-auto flex-1 pb-4">
-                        @forelse($directories as $folder => $files)
-                            @if(count($files) === 1)
-                                <!-- Single file folder - direct link -->
-                                <li>
-                                    <a href="{{ route('laravel-app-documentation-editor.index', ['folderName' => $folder, 'filePath' => $files[0]['file_path']]) }}"
-                                        class="group flex items-center gap-x-3 rounded-md p-2 mx-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-all duration-200 ease-in-out transform hover:translate-x-1">
-                                        <i data-lucide="file-text" class="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-200"></i>
-                                        {{ $folder }}
-                                    </a>
-                                </li>
-                            @else
-                                <!-- Multi-file folder - collapsible -->
-                                <li>
-                                    <details class="group [&_summary::-webkit-details-marker]:hidden">
-                                        <summary
-                                            class="flex cursor-pointer items-center justify-between rounded-lg px-4 py-2 hover:bg-gray-100 hover:text-gray-700 mx-2 transition-all duration-200 ease-in-out group hover:shadow-sm">
-                                            <div class="flex items-center gap-3">
-                                                <i data-lucide="folder" class="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-200"></i>
-                                                <span class="text-sm font-medium">{{ $folder }}</span>
-                                            </div>
+        <aside data-sidebar
+               class="fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col border-r border-slate-200 bg-slate-50 transition-transform duration-200 ease-out lg:static lg:translate-x-0 dark:border-slate-800 dark:bg-slate-900">
+            <div class="flex h-16 shrink-0 items-center gap-3 border-b border-slate-200 px-5 dark:border-slate-800">
+                <a href="{{ route('laravel-app-documentation-editor.index') }}" class="flex items-center gap-2.5">
+                    <span class="flex size-8 items-center justify-center rounded-lg bg-blue-600 text-white shadow-sm">
+                        <i data-lucide="book-open" class="size-4"></i>
+                    </span>
+                    <span class="text-[15px] font-semibold tracking-tight text-slate-900 dark:text-white">Documentation</span>
+                </a>
+                <button type="button" data-sidebar-close
+                        class="ml-auto inline-flex size-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200/70 hover:text-slate-900 lg:hidden dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+                        aria-label="Close navigation">
+                    <i data-lucide="x" class="size-4"></i>
+                </button>
+            </div>
 
-                                            <span class="shrink-0 transition duration-300 group-open:-rotate-180">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 20 20"
-                                                    fill="currentColor">
-                                                    <path fill-rule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clip-rule="evenodd" />
-                                                </svg>
-                                            </span>
-                                        </summary>
+            <div class="shrink-0 px-4 pt-4">
+                <label class="relative block">
+                    <span class="sr-only">Filter documents</span>
+                    <i data-lucide="search" class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400"></i>
+                    <input type="search" data-nav-filter placeholder="Filter documents"
+                           class="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-9 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:placeholder:text-slate-500">
+                    <kbd class="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border border-slate-200 px-1.5 font-sans text-[11px] text-slate-400 sm:block dark:border-slate-700">/</kbd>
+                </label>
+            </div>
 
-                                        <ul class="mt-2 space-y-1 px-4">
-                                            @foreach($files as $file)
-                                                <li>
-                                                    <a href="{{ route('laravel-app-documentation-editor.index', ['folderName' => $file['file_name'], 'filePath' => $file['file_path']]) }}"
-                                                        class="flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-all duration-200 ease-in-out transform hover:translate-x-1 group">
-                                                        <i data-lucide="file-text" class="w-4 h-4 text-gray-400 group-hover:text-blue-500 transition-colors duration-200"></i>
-                                                        {{ $file['file_name'] }}
-                                                    </a>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    </details>
-                                </li>
-                            @endif
-                        @empty
-                            <li>
-                                <a href="#"
-                                    class="block rounded-lg px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700">
-                                    No documentation found.
+            <nav class="min-h-0 flex-1 overflow-y-auto px-3 py-4" aria-label="Documents">
+                <ul role="list" class="space-y-0.5">
+                    @forelse($directories as $folder => $files)
+                        @if(count($files) === 1)
+                            @php($isActive = $activeFilePath === $files[0]['file_path'])
+                            <li data-nav-entry>
+                                <a href="{{ route('laravel-app-documentation-editor.index', ['folderName' => $folder, 'filePath' => $files[0]['file_path']]) }}"
+                                   @if($isActive) aria-current="page" @endif
+                                   @class([
+                                       'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors',
+                                       'bg-blue-50 font-medium text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' => $isActive,
+                                       'text-slate-600 hover:bg-slate-200/60 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white' => ! $isActive,
+                                   ])>
+                                    <i data-lucide="file-text" class="size-4 shrink-0 opacity-70"></i>
+                                    <span class="truncate">{{ $folder }}</span>
                                 </a>
                             </li>
-                        @endforelse
-                    </ul>
-                </div>
+                        @else
+                            @php($hasActiveChild = collect($files)->contains(fn (array $file): bool => $file['file_path'] === $activeFilePath))
+                            <li data-nav-entry>
+                                <details class="group [&_summary::-webkit-details-marker]:hidden" @if($hasActiveChild) open data-active-group @endif>
+                                    <summary class="flex cursor-pointer list-none items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-200/60 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white">
+                                        <i data-lucide="folder" class="size-4 shrink-0 opacity-70"></i>
+                                        <span class="truncate">{{ $folder }}</span>
+                                        <i data-lucide="chevron-right" class="ml-auto size-4 shrink-0 text-slate-400 transition-transform duration-200 group-open:rotate-90"></i>
+                                    </summary>
+
+                                    <ul role="list" class="my-1 ml-5 space-y-0.5 border-l border-slate-200 pl-2 dark:border-slate-800">
+                                        @foreach($files as $file)
+                                            @php($isActive = $activeFilePath === $file['file_path'])
+                                            <li data-nav-child>
+                                                <a href="{{ route('laravel-app-documentation-editor.index', ['folderName' => $file['file_name'], 'filePath' => $file['file_path']]) }}"
+                                                   @if($isActive) aria-current="page" @endif
+                                                   @class([
+                                                       'block truncate rounded-lg px-3 py-1.5 text-sm transition-colors',
+                                                       'bg-blue-50 font-medium text-blue-700 dark:bg-blue-500/10 dark:text-blue-400' => $isActive,
+                                                       'text-slate-500 hover:bg-slate-200/60 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white' => ! $isActive,
+                                                   ])>
+                                                    {{ $file['file_name'] }}
+                                                </a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </details>
+                            </li>
+                        @endif
+                    @empty
+                        <li class="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">No documentation found.</li>
+                    @endforelse
+                </ul>
+
+                <p data-nav-empty class="hidden px-3 py-2 text-sm text-slate-500 dark:text-slate-400">No matching documents.</p>
+            </nav>
+
+            <div class="flex shrink-0 items-center justify-between border-t border-slate-200 px-4 py-3 dark:border-slate-800">
+                <span class="text-xs text-slate-500 dark:text-slate-400">Appearance</span>
+                @include('laravel-app-documentation-editor::partials.theme-toggle')
             </div>
         </aside>
 
-        <main class="col-span-1 md:col-span-9 p-4 md:p-8 bg-gradient-to-br from-slate-100/95 via-slate-50/90 to-blue-50/20 h-screen overflow-hidden">
-            <div class="h-full bg-slate-200 backdrop-blur-xl border border-slate-200/40 rounded-2xl shadow-[0_0_50px_-20px_rgba(0,0,0,0.12)] p-4 md:p-8 overflow-y-auto transition-all duration-500 ease-in-out transform hover:shadow-lg">
-                <div class="max-w-4xl mx-auto">
-                    <div class="flex items-center justify-between mb-8">
-                        <div class="flex items-start gap-4">
-                            <div class="p-3 bg-blue-600/10 rounded-xl">
-                                <i data-lucide="file" class="w-6 h-6 text-blue-600"></i>
-                            </div>
-                            <h1 class="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                                {{ $title ?? 'Dashboard Content' }}
-                            </h1>
-                        </div>
+        <div class="flex min-w-0 flex-1 flex-col">
+            <header class="flex h-16 shrink-0 items-center gap-3 border-b border-slate-200 bg-white/90 px-4 backdrop-blur sm:px-8 dark:border-slate-800 dark:bg-slate-950/90">
+                <button type="button" data-sidebar-open
+                        class="-ml-1 inline-flex size-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 lg:hidden dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white"
+                        aria-label="Open navigation">
+                    <i data-lucide="menu" class="size-5"></i>
+                </button>
 
-                        @if ($hasEditAccess && request()->has('filePath') && request()->has('folderName'))
-                            <a href="{{ route('laravel-app-documentation-editor.edit') }}?filePath={{ request()->string('filePath') }}&folderName={{ request()->string('folderName') }}"
-                                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors duration-200">
-                                <i data-lucide="edit-2" class="w-4 h-4"></i>
-                                Edit Document
-                            </a>
-                        @endif
-                    </div>
-
-                    <div class="mt-6 document-content prose max-w-none bg-white/60 rounded-xl p-4 sm:p-6 md:p-8 shadow-sm border border-slate-200/50 transition-all duration-500 ease-in-out transform hover:shadow-md hover:bg-white/75 hover:border-slate-300/50"
-                    >
-                    {!! $content ?? '<p>Select a file from the sidebar to view its documentation</p>' !!}
-                    </div>
+                <div class="min-w-0">
+                    <p class="truncate text-sm font-semibold text-slate-900 dark:text-white">{{ $title ?? 'Documentation' }}</p>
+                    @if($activeFilePath)
+                        <p class="truncate font-mono text-xs text-slate-500 dark:text-slate-400">{{ $activeFilePath }}</p>
+                    @endif
                 </div>
-            </div>
-        </main>
+
+                @if ($hasEditAccess && request()->has('filePath') && request()->has('folderName'))
+                    <a href="{{ route('laravel-app-documentation-editor.edit') }}?filePath={{ request()->string('filePath') }}&folderName={{ request()->string('folderName') }}"
+                       class="ml-auto inline-flex shrink-0 items-center gap-2 rounded-lg bg-blue-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-950">
+                        <i data-lucide="pencil" class="size-4"></i>
+                        <span class="hidden sm:inline">Edit document</span>
+                    </a>
+                @endif
+            </header>
+
+            <main class="min-h-0 flex-1 overflow-y-auto">
+                @isset($content)
+                    <article class="document-content prose prose-slate mx-auto max-w-3xl px-4 py-10 sm:px-8 lg:py-14 dark:prose-invert">
+                        {!! $content !!}
+                    </article>
+                @else
+                    <div class="mx-auto flex max-w-md flex-col items-center px-6 py-24 text-center">
+                        <span class="flex size-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                            <i data-lucide="book-open" class="size-6"></i>
+                        </span>
+                        <h1 class="mt-5 text-xl font-semibold tracking-tight text-slate-900 dark:text-white">{{ $title ?? 'Documentation' }}</h1>
+                        <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Select a document from the sidebar to start reading.</p>
+                        <button type="button" data-sidebar-open
+                                class="mt-6 inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3.5 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 lg:hidden dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
+                            <i data-lucide="menu" class="size-4"></i>
+                            Browse documents
+                        </button>
+                    </div>
+                @endisset
+            </main>
+        </div>
     </div>
 </body>
 </html>
